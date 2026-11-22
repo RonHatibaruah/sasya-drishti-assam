@@ -384,17 +384,17 @@ The deployment of SasyaDrishti is structured for capital efficiency, leveraging 
 
 | Budget Head / Cost Driver | Allocation (%) | Indicative Amount (₹ Lakh) | Scope & Key Deliverables |
 | :--- | :---: | :---: | :--- |
-| **UAV Drone Fleet & Sensor Rentals** | **35%** | **₹10.5 Lakh** | DGCA-certified pilot missions, 5-band multispectral MicaSense RedEdge calibration, 50,000 ha orthomosaic photogrammetry |
-| **Cloud & Geospatial Compute** | **25%** | **₹7.5 Lakh** | PostGIS 16 spatial DB, GPU compute (NVIDIA A10G/T4) for deep learning ConvLSTM, Cloudflare edge hosting |
-| **Engineering Personnel & Technical Team** | **25%** | **₹7.5 Lakh** | Remuneration for Remote Sensing Scientist, ML Engineer, Geospatial Developer, and Senior Agronomist |
-| **Field Equipment & CCE Digital Toolkits** | **15%** | **₹4.5 Lakh** | Digital grain moisture meters (14% std), 5m×5m quadrant ropes, portable balances, ADO field workshops |
-| **Total Indicative MVP Budget** | **100%** | **₹30.0 Lakh** | **Complete 12-Month Development, Calibration & 3-District Operational Pilot** |
+| **Engineering Personnel & Technical Team/ Software development stack team** | **43.75%** | **₹17.5 Lakh** | Specialized remuneration for Lead Architect, Remote Sensing Scientist, ML/AI Engineers, Full-Stack Geospatial & Mobile PWA Developers, Data Pipeline Engineers, and Senior Agronomist |
+| **UAV Drone Fleet & Sensor Rentals** | **26.25%** | **₹10.5 Lakh** | DGCA-certified pilot missions, 5-band multispectral MicaSense RedEdge calibration, 50,000 ha orthomosaic photogrammetry |
+| **Cloud & Geospatial Compute** | **18.75%** | **₹7.5 Lakh** | PostGIS 16 spatial DB, GPU compute (NVIDIA A10G/T4) for deep learning ConvLSTM, Cloudflare edge hosting |
+| **Field Equipment & CCE Digital Toolkits** | **11.25%** | **₹4.5 Lakh** | Digital grain moisture meters (14% std), 5m×5m quadrant ropes, portable balances, ADO field workshops |
+| **Total Indicative MVP Budget** | **100%** | **₹40.0 Lakh** | **Complete 12-Month Development, Calibration & 3-District Operational Pilot** |
 
 ### Key Cost Drivers & Resource Breakdown
-1. **Cloud & High-Performance Geospatial Compute (25%):** PostGIS 16 spatial database instances, Cloudflare Pages edge hosting, and GPU compute instances (NVIDIA T4/A10G) for training deep-learning Bi-LSTM time-series models.
-2. **UAV Drone Fleet Missions & Sensor Payload Rentals (35%):** DGCA-certified drone pilot service contracts, MicaSense RedEdge 5-band multispectral sensor calibration, and photogrammetry cloud processing over 50,000 hectares of pilot clusters.
-3. **Field Equipment & CCE Digital Toolkits (15%):** Digital grain moisture meters (calibrated to 14% storage standard), 5m × 5m quadrant survey ropes, portable electronic hanging balances, and field training workshops for circle ADOs and Krishi Sahayaks.
-4. **Engineering Personnel & Technical Operations (25%):** Specialized remuneration for the core technical team (Remote Sensing Scientist, ML Engineer, Full-Stack Geospatial Developer, and Agronomist).
+1. **Engineering Personnel & Technical Team/ Software development stack team (43.75% - ₹17.5 Lakh):** Specialized remuneration for the core technical team and expanded software development stack team covering full-stack geospatial WebGIS engineering, offline-first mobile PWA stack, automated Sentinel/UAV ingestion pipelines, machine learning architecture, and agronomists.
+2. **UAV Drone Fleet Missions & Sensor Payload Rentals (26.25% - ₹10.5 Lakh):** DGCA-certified drone pilot service contracts, MicaSense RedEdge 5-band multispectral sensor calibration, and photogrammetry cloud processing over 50,000 hectares of pilot clusters.
+3. **Cloud & High-Performance Geospatial Compute (18.75% - ₹7.5 Lakh):** PostGIS 16 spatial database instances, Cloudflare Pages edge hosting, and GPU compute instances (NVIDIA T4/A10G) for training deep-learning Bi-LSTM time-series models.
+4. **Field Equipment & CCE Digital Toolkits (11.25% - ₹4.5 Lakh):** Digital grain moisture meters (calibrated to 14% storage standard), 5m × 5m quadrant survey ropes, portable electronic hanging balances, and field training workshops for circle ADOs and Krishi Sahayaks.
 
 ### Risk Analysis & Mitigation Matrix
 - **Risk 1: Persistent Heavy Monsoon Rainfall Grounding Drone Flights:**

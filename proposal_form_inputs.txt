@@ -333,19 +333,19 @@ Core Architectural Innovations:
 
 --------------------------------------------------------------------------------
 FIELD: 12. RESOURCES, RISKS & PILOT VALIDATION
-WORD COUNT: 431 words (Limit: 500 words)
+WORD COUNT: 447 words (Limit: 500 words)
 --------------------------------------------------------------------------------
 
 Resource Drivers & Indicative Budget Allocation (Rs. 20-40 Lakh Tier):
-SasyaDrishti is structured for capital efficiency, leveraging open-access satellite data, existing departmental smartphone devices, and targeted drone pilot sampling to deliver maximum governance impact within the NESFIC MVP grant framework (Rs. 30.0 Lakh total indicative budget):
+SasyaDrishti is structured for capital efficiency, leveraging open-access satellite data, existing departmental smartphone devices, and targeted drone pilot sampling to deliver maximum governance impact within the NESFIC MVP grant framework (Rs. 40.0 Lakh total indicative budget):
 
-1. UAV Drone Fleet Missions & Sensor Rentals (35% - Rs. 10.5 Lakh):
+1. Engineering Personnel & Technical Team/ Software development stack team (43.75% - Rs. 17.5 Lakh):
+Specialized remuneration for the core technical team and expanded software development stack team covering full-stack geospatial WebGIS engineering, offline-first mobile PWA stack, automated Sentinel/UAV ingestion pipelines, machine learning architecture, and agronomists.
+2. UAV Drone Fleet Missions & Sensor Rentals (26.25% - Rs. 10.5 Lakh):
 DGCA-certified pilot flight contracts, 5-band multispectral MicaSense RedEdge sensor calibration, and cloud photogrammetry processing over 50,000 hectares of pilot clusters.
-2. Cloud & High-Performance Geospatial Compute (25% - Rs. 7.5 Lakh):
+3. Cloud & High-Performance Geospatial Compute (18.75% - Rs. 7.5 Lakh):
 PostGIS 16 spatial database instances, Cloudflare Pages edge hosting, and GPU compute instances (NVIDIA A10G/T4) for deep learning ConvLSTM model training.
-3. Engineering Personnel & Technical Operations (25% - Rs. 7.5 Lakh):
-Specialized remuneration for core technical team members (Remote Sensing Scientist, Machine Learning Engineer, Geospatial Full-Stack Developer, and Senior Agronomist).
-4. Field Equipment & CCE Digital Toolkits (15% - Rs. 4.5 Lakh):
+4. Field Equipment & CCE Digital Toolkits (11.25% - Rs. 4.5 Lakh):
 Digital grain moisture meters (calibrated to 14% storage standard), 5m x 5m quadrant survey ropes, portable electronic hanging balances, and field training workshops for circle ADOs and Krishi Sahayaks.
 
 Risk Analysis & Mitigation Matrix:

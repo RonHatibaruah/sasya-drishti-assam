@@ -399,7 +399,10 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
             
             col_count = len(headers)
             if col_count > 0:
-                col_w = avail_width / col_count
+                if col_count == 4 and any('Budget' in h or 'Allocation' in h for h in headers):
+                    col_widths = [150, 60, 84, 210]
+                else:
+                    col_widths = [avail_width / col_count] * col_count
                 t_matrix = []
                 h_row = [Paragraph(clean_inline_text(h), styles['table_header']) for h in headers]
                 t_matrix.append(h_row)
@@ -408,7 +411,7 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
                     row_cells = [Paragraph(clean_inline_text(c), styles['table_cell']) for c in padded[:col_count]]
                     t_matrix.append(row_cells)
                 
-                tbl = Table(t_matrix, colWidths=[col_w]*col_count)
+                tbl = Table(t_matrix, colWidths=col_widths)
                 tbl.setStyle(TableStyle([
                     ('BACKGROUND', (0,0), (-1,0), BROWN_PRIMARY),
                     ('TEXTCOLOR', (0,0), (-1,0), colors.white),
