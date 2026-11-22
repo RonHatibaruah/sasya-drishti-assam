@@ -1,6 +1,14 @@
 import os
 import re
+import hashlib
 from xml.sax.saxutils import escape
+
+# Set Matplotlib cache directory before importing matplotlib
+os.environ["MPLCONFIGDIR"] = "/tmp/matplotlib-cache"
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -18,6 +26,9 @@ TEXT_DARK = colors.HexColor("#1c1917")
 TEXT_MUTED = colors.HexColor("#57534e")
 BORDER_LIGHT = colors.HexColor("#d6d3d1")
 BG_LIGHT = colors.HexColor("#fdfbf7")
+
+FORMULA_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'formula_cache')
+os.makedirs(FORMULA_CACHE_DIR, exist_ok=True)
 
 class D12NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
@@ -57,6 +68,29 @@ class D12NumberedCanvas(canvas.Canvas):
         self.drawRightString(letter[0] - 54, 32, f"Page {self._pageNumber} of {page_count}")
         self.restoreState()
 
+def format_math_span(latex):
+    s = latex.strip()
+    s = re.sub(r'\\(?:text|mathrm|mathbf)\{([^}]+)\}', r'\1', s)
+    s = s.replace(r'\lambda', '&lambda;')
+    s = s.replace(r'\sigma', '&sigma;')
+    s = s.replace(r'\le', '&le;')
+    s = s.replace(r'\ge', '&ge;')
+    s = s.replace(r'\approx', '&asymp;')
+    s = s.replace(r'\times', '&times;')
+    s = s.replace(r'\pm', '&plusmn;')
+    s = s.replace(r'\sim', '~')
+    
+    # Handle comparisons FIRST so <sup> and <sub> tags are never escaped
+    s = s.replace('<', '&lt;').replace('>', '&gt;')
+    
+    # Handle powers and subscripts
+    s = re.sub(r'\^\{?([0-9a-zA-Z+-]+)\}?', r'<sup>\1</sup>', s)
+    s = re.sub(r'_\{?([0-9a-zA-Z+-]+)\}?', r'<sub>\1</sub>', s)
+    
+    # Italicize standalone single variable letters
+    s = re.sub(r'\b([RpnZME])\b', r'<i>\1</i>', s)
+    return s
+
 def clean_inline_text(text):
     if not text:
         return ""
@@ -65,16 +99,101 @@ def clean_inline_text(text):
     t = t.replace('শস্য দৃষ্টি', 'SasyaDrishti')
     t = t.replace('–', '-').replace('—', ' - ')
     t = t.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
-    t = t.replace('≤', '<=').replace('≥', '>=').replace('±', '+/-')
-    t = t.replace('×', 'x')
+    t = t.replace('≤', '&le;').replace('≥', '&ge;').replace('±', '&plusmn;')
+    t = t.replace('×', '&times;').replace('≈', '&asymp;')
     
+    # 1. Extract inline math $...$
+    math_tokens = []
+    def save_math(m):
+        tok = f"___MATH_TOKEN_{len(math_tokens)}___"
+        math_tokens.append(format_math_span(m.group(1)))
+        return tok
+        
+    t = re.sub(r'\$([^\$]+)\$', save_math, t)
+    
+    # 2. Escape regular HTML entities (<, >, &)
     t = escape(t)
     
+    # 3. Restore formatted math spans
+    for i, tok_val in enumerate(math_tokens):
+        t = t.replace(f"___MATH_TOKEN_{i}___", tok_val)
+        
+    # 4. Standard markdown bold/italic/code
     t = re.sub(r'\*\*\*(.*?)\*\*\*', r'<b><i>\1</i></b>', t)
     t = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', t)
     t = re.sub(r'\*(.*?)\*', r'<i>\1</i>', t)
     t = re.sub(r'`(.*?)`', r'<font face="Courier" color="#78350f">\1</font>', t)
     return t
+
+def sanitize_latex_for_mathtext(latex_code):
+    s = latex_code.strip()
+    s = s.replace(r"\%", "%")
+    def clean_text_block(m):
+        content = m.group(1).replace("%", "")
+        words = [w for w in content.split() if w]
+        joined = r"\ ".join(words)
+        res = r"\mathrm{" + joined + r"}"
+        if "%" in m.group(1):
+            res += r"\ \%"
+        return res
+        
+    s = re.sub(r"\\(?:text|mathrm)\{([^}]+)\}", clean_text_block, s)
+    s = re.sub(r"(?<!\\)%", r"\%", s)
+    s = re.sub(r"(\d),(\d)", r"\1{,}\2", s)
+    return s
+
+def render_math_image(latex_code, text_color="#2d1b11", fontsize=12):
+    sanitized = sanitize_latex_for_mathtext(latex_code)
+    
+    h = hashlib.md5(sanitized.encode('utf-8')).hexdigest()
+    img_path = os.path.join(FORMULA_CACHE_DIR, f"eq_{h}.png")
+    if not os.path.exists(img_path):
+        fig = plt.figure(figsize=(6.4, 0.75), dpi=300)
+        fig.patch.set_alpha(0.0)
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.axis("off")
+        ax.text(0.5, 0.5, f"${sanitized}$", fontsize=fontsize, ha="center", va="center", color=text_color)
+        plt.savefig(img_path, dpi=300, transparent=True)
+        plt.close(fig)
+    return img_path
+
+def create_equation_flowable(latex_str, eq_num, styles, avail_width=504):
+    try:
+        img_path = render_math_image(latex_str)
+        img_w = 415
+        img_h = 36
+        
+        table_data = [
+            [
+                Image(img_path, width=img_w, height=img_h),
+                Paragraph(f"<b>(Eq. {eq_num})</b>", styles['eq_num'])
+            ]
+        ]
+        eq_table = Table(table_data, colWidths=[avail_width - 60, 60])
+        eq_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), BG_LIGHT),
+            ('ALIGN', (0,0), (0,0), 'CENTER'),
+            ('ALIGN', (1,0), (1,0), 'RIGHT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LINELEFT', (0,0), (0,-1), 2.5, WARM_AMBER),
+            ('BOX', (0,0), (-1,-1), 0.5, BORDER_LIGHT),
+            ('TOPPADDING', (0,0), (-1,-1), 2),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ]))
+        return [
+            Spacer(1, 3),
+            eq_table,
+            Spacer(1, 4)
+        ]
+    except Exception as e:
+        fallback_text = clean_inline_text(latex_str)
+        return [
+            Spacer(1, 3),
+            Paragraph(f"<b>[Eq. {eq_num}]:</b> <i>{fallback_text}</i>", styles['body']),
+            Spacer(1, 3)
+        ]
 
 def setup_styles():
     styles = getSampleStyleSheet()
@@ -168,6 +287,16 @@ def setup_styles():
         spaceAfter=6
     )
 
+    eq_num_style = ParagraphStyle(
+        'EqNum',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8.5,
+        leading=11,
+        textColor=WARM_AMBER,
+        alignment=2 # Right aligned
+    )
+
     table_cell_style = ParagraphStyle(
         'TableCell',
         parent=styles['Normal'],
@@ -204,12 +333,13 @@ def setup_styles():
         'body': body_style,
         'bullet': bullet_style,
         'caption': caption_style,
+        'eq_num': eq_num_style,
         'table_cell': table_cell_style,
         'table_header': table_header_style,
         'meta_banner': meta_banner_style
     }
 
-def get_diagram_flowable(diagram_filename, caption_text, styles, width=490, height=265):
+def get_diagram_flowable(diagram_filename, caption_text, styles, width=490, height=275):
     img_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'proposal_diagrams')
     img_path = os.path.join(img_dir, diagram_filename)
     if os.path.exists(img_path):
@@ -225,9 +355,28 @@ def get_diagram_flowable(diagram_filename, caption_text, styles, width=490, heig
 def parse_markdown_blocks(lines, styles, avail_width=504):
     flowables = []
     i = 0
+    eq_counter = 1
+    
     while i < len(lines):
         line = lines[i].strip()
         if not line:
+            i += 1
+            continue
+
+        # Display Math Block Detection ($$ ... $$)
+        if line.startswith('$$'):
+            eq_lines = [line]
+            if not (line.endswith('$$') and len(line) > 2):
+                i += 1
+                while i < len(lines):
+                    eq_lines.append(lines[i].strip())
+                    if lines[i].strip().endswith('$$'):
+                        break
+                    i += 1
+            raw_eq = " ".join(eq_lines)
+            cleaned_eq = raw_eq.replace('$$', '').strip()
+            flowables.extend(create_equation_flowable(cleaned_eq, eq_counter, styles, avail_width=avail_width))
+            eq_counter += 1
             i += 1
             continue
 
@@ -391,7 +540,7 @@ def build_pdf(md_filename, pdf_filename, doc_title, subtitle):
     print(f"Successfully generated {pdf_path} ({size_mb:.2f} MB)")
 
 if __name__ == '__main__':
-    # 1. Proposal PDF with Embedded Infographics
+    # 1. Proposal PDF with Embedded Infographics and Mathematical Formulas
     build_pdf(
         'proposal_contents.md',
         'NESFIC_D12_Proposal_Ron_Hatibaruah.pdf',
@@ -399,7 +548,7 @@ if __name__ == '__main__':
         'AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data'
     )
     
-    # 2. Proof of Work Dossier PDF with Embedded Infographics
+    # 2. Proof of Work Dossier PDF with Embedded Infographics and Mathematical Formulations
     build_pdf(
         'proof_of_work_dossier.md',
         'NESFIC_D12_Proof_of_Work_Ron_Hatibaruah.pdf',

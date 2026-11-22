@@ -68,6 +68,19 @@ The prototype successfully demonstrates:
 +─────────────────────────────────────────────────────────────────────────────────────────+
 ```
 
+### Mathematical Formulations & Standardized Normalization Algorithms
+
+To guarantee mathematical consistency across all administrative tiers, SasyaDrishti enforces three core equations:
+
+1. **Assam Statutory Land Unit Metric Translation:**
+$$\text{Area (Ha)} = \left(\text{Bigha} + \frac{\text{Katha}}{5} + \frac{\text{Lesa}}{100}\right) \times 0.13378038$$
+
+2. **Optical Canopy Vigor Formulation (NDVI):**
+$$\text{NDVI} = \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}$$
+
+3. **Field CCE Moisture Standardization to 14.0% National Warehouse Standard:**
+$$\text{Yield}_{\text{std}} = \text{Yield}_{\text{field}} \times \left(\frac{100 - M_{\text{field}}}{100 - 14.0}\right)$$
+
 ---
 
 ## 3. Operational Proof of Work & Empirical Benchmarks
