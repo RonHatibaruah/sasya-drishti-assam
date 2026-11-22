@@ -110,7 +110,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
           <button
             onClick={() => onNavigateToTab('satellite-gis')}
-            className="text-xs bg-amber-800 hover:bg-amber-900 text-white px-3 py-1.5 rounded-lg border border-amber-700 transition-colors whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-xs"
+            className="text-xs bg-amber-800 hover:bg-amber-900 text-white px-3 py-1.5 rounded-lg border border-amber-700 transition-colors whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-xs cursor-pointer"
           >
             <span>View SAR Flood Mask</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -122,18 +122,18 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Monitored Acreage */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">Monitored Acreage</span>
-            <div className="p-1.5 bg-blue-50 rounded-lg text-blue-700">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
+          <div className="flex items-center justify-between text-stone-500 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">Monitored Acreage</span>
+            <div className="p-1.5 bg-amber-50 rounded-lg text-amber-800">
               <Satellite className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-blue-950">
+            <span className="text-2xl font-bold text-stone-900">
               {(totalMonitoredHectares / 1000).toFixed(1)}k
             </span>
-            <span className="text-xs font-medium text-slate-500">Hectares</span>
+            <span className="text-xs font-medium text-stone-500">Hectares</span>
           </div>
           <p className="text-xs text-emerald-700 mt-2 font-medium flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -142,35 +142,35 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         </div>
 
         {/* Projected Production */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">Projected Production</span>
-            <div className="p-1.5 bg-blue-50 rounded-lg text-blue-700">
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
+          <div className="flex items-center justify-between text-stone-500 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">Projected Production</span>
+            <div className="p-1.5 bg-amber-50 rounded-lg text-amber-800">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-blue-950">
+            <span className="text-2xl font-bold text-stone-900">
               {(totalProductionTonnes / 100000).toFixed(2)}
             </span>
-            <span className="text-xs font-medium text-slate-500">Lakh Metric Tonnes</span>
+            <span className="text-xs font-medium text-stone-500">Lakh Metric Tonnes</span>
           </div>
-          <p className="text-xs text-slate-600 mt-2 flex items-center gap-1">
-            <span className="font-medium text-blue-900">FCI &amp; AFCSCL Procurement Target: 94% Met</span>
+          <p className="text-xs text-stone-600 mt-2 flex items-center gap-1">
+            <span className="font-medium text-amber-900">FCI &amp; AFCSCL Procurement Target: 94% Met</span>
           </p>
         </div>
 
         {/* Average Projected Yield */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">State Average Yield</span>
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
+          <div className="flex items-center justify-between text-stone-500 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">State Average Yield</span>
             <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-700">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-blue-950">{avgYieldKgHa}</span>
-            <span className="text-xs font-medium text-slate-500">kg/ha ({avgYieldQuintalsBigha} Q/Bigha)</span>
+            <span className="text-2xl font-bold text-stone-900">{avgYieldKgHa}</span>
+            <span className="text-xs font-medium text-stone-500">kg/ha ({avgYieldQuintalsBigha} Q/Bigha)</span>
           </div>
           <p className="text-xs text-emerald-700 mt-2 font-medium flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -179,20 +179,20 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         </div>
 
         {/* Ground Truth CCE Validation */}
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">Field CCE Ground-Truth</span>
+        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
+          <div className="flex items-center justify-between text-stone-500 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">Field CCE Ground-Truth</span>
             <div className="p-1.5 bg-teal-50 rounded-lg text-teal-700">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-blue-950">{totalCceCompleted} / {totalCceTarget}</span>
-            <span className="text-xs font-medium text-slate-500">Cuts Done</span>
+            <span className="text-2xl font-bold text-stone-900">{totalCceCompleted} / {totalCceTarget}</span>
+            <span className="text-xs font-medium text-stone-500">Cuts Done</span>
           </div>
-          <div className="w-full bg-slate-200 h-1.5 rounded-full mt-3 overflow-hidden">
+          <div className="w-full bg-stone-200 h-1.5 rounded-full mt-3 overflow-hidden">
             <div 
-              className="bg-blue-600 h-full rounded-full transition-all duration-500"
+              className="bg-amber-700 h-full rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, cceProgressPercent)}%` }}
             ></div>
           </div>
@@ -201,29 +201,29 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* District Intelligence Leaderboard */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+      <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-base font-bold text-blue-950 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-blue-700" />
+            <h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-amber-800" />
               <span>Assam District Remote Sensing &amp; Yield Leaderboard</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5">
               Multi-source yield forecasting across Brahmaputra and Barak agro-climatic zones
             </p>
           </div>
           <button
             onClick={exportSummaryCsv}
-            className="flex items-center space-x-1.5 bg-[#0c2340] hover:bg-blue-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors self-start sm:self-auto"
+            className="flex items-center space-x-1.5 bg-[#2d1b11] hover:bg-amber-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export District CSV</span>
           </button>
         </div>
 
-        <div className="overflow-x-auto border border-slate-200 rounded-lg">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+        <div className="overflow-x-auto border border-stone-200 rounded-lg">
+          <table className="w-full text-left text-xs text-stone-700">
+            <thead className="bg-[#2d1b11] text-white font-semibold uppercase tracking-wider border-b border-amber-900/60">
               <tr>
                 <th className="px-4 py-3">District</th>
                 <th className="px-4 py-3">Monitored Area</th>
@@ -235,23 +235,23 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                 <th className="px-4 py-3">CCE Progress</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-stone-200">
               {filteredSummaries.map((summary) => (
-                <tr key={summary.district} className="hover:bg-blue-50/50 transition-colors">
-                  <td className="px-4 py-3.5 font-bold text-blue-950 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <tr key={summary.district} className="hover:bg-amber-50/40 transition-colors">
+                  <td className="px-4 py-3.5 font-bold text-stone-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-700"></span>
                     <span>{summary.district}</span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="font-semibold text-slate-900">{summary.monitoredHectares.toLocaleString()} Ha</span>
-                    <span className="block text-[10px] text-slate-500">({summary.monitoredBighas.toLocaleString()} Bighas)</span>
+                    <span className="font-semibold text-stone-900">{summary.monitoredHectares.toLocaleString()} Ha</span>
+                    <span className="block text-[10px] text-stone-500">({summary.monitoredBighas.toLocaleString()} Bighas)</span>
                   </td>
-                  <td className="px-4 py-3.5 font-mono font-semibold text-blue-900">
+                  <td className="px-4 py-3.5 font-mono font-semibold text-amber-900">
                     {summary.estimatedProductionTonnes.toLocaleString()} MT
                   </td>
-                  <td className="px-4 py-3.5 font-bold text-slate-900">
+                  <td className="px-4 py-3.5 font-bold text-stone-900">
                     {summary.averageYieldKgHa} kg/ha
-                    <span className="block text-[10px] text-slate-500 font-normal">
+                    <span className="block text-[10px] text-stone-500 font-normal">
                       {kgHaToQuintalsPerBigha(summary.averageYieldKgHa)} Q/Bigha
                     </span>
                   </td>
@@ -269,19 +269,19 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                     )}
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[11px] font-mono font-semibold border border-blue-200">
+                    <span className="bg-amber-50 text-amber-900 px-2 py-0.5 rounded text-[11px] font-mono font-semibold border border-amber-200">
                       {summary.sarPenetrationCoveragePercent}%
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 font-mono font-medium text-slate-700">
+                  <td className="px-4 py-3.5 font-mono font-medium text-stone-700">
                     {summary.droneCoveragePercent}%
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-semibold text-slate-800">{summary.cceCompletedCount}/{summary.cceTargetCount}</span>
-                      <div className="w-16 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <span className="font-mono font-semibold text-stone-800">{summary.cceCompletedCount}/{summary.cceTargetCount}</span>
+                      <div className="w-16 bg-stone-200 h-1.5 rounded-full overflow-hidden">
                         <div 
-                          className="bg-blue-600 h-full rounded-full" 
+                          className="bg-amber-700 h-full rounded-full" 
                           style={{ width: `${Math.round((summary.cceCompletedCount / summary.cceTargetCount) * 100)}%` }}
                         ></div>
                       </div>
@@ -295,14 +295,14 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
       </div>
 
       {/* Pilot Agricultural Parcels Table */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+      <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-base font-bold text-blue-950 flex items-center gap-2">
-              <Plane className="w-4 h-4 text-blue-700" />
+            <h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
+              <Plane className="w-4 h-4 text-amber-800" />
               <span>Satellite &amp; Drone Ground-Truthing Field Parcels</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5">
               Live Dag-level remote sensing predictions with Sentinel-2 NDVI, Sentinel-1 SAR, and CCE validation
             </p>
           </div>
@@ -310,23 +310,23 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             {/* Search */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Search Dag, Farmer, Village..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 w-48 sm:w-60"
+                className="bg-stone-50 border border-stone-300 rounded-lg pl-8 pr-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-hidden focus:border-amber-800 w-48 sm:w-60"
               />
             </div>
 
             {/* Crop Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex items-center space-x-1.5 bg-stone-50 px-2.5 py-1.5 rounded-lg border border-stone-300 text-xs">
+              <Filter className="w-3.5 h-3.5 text-stone-500" />
               <select
                 value={filterCrop}
                 onChange={(e) => setFilterCrop(e.target.value)}
-                className="bg-transparent text-slate-800 text-xs focus:outline-none cursor-pointer pr-1 font-medium"
+                className="bg-transparent text-stone-800 text-xs focus:outline-hidden cursor-pointer pr-1 font-medium"
               >
                 <option value="ALL">All Crops</option>
                 <option value="SALI_PADDY">Sali Paddy</option>
@@ -338,9 +338,9 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
           </div>
         </div>
 
-        <div className="overflow-x-auto border border-slate-200 rounded-lg">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+        <div className="overflow-x-auto border border-stone-200 rounded-lg">
+          <table className="w-full text-left text-xs text-stone-700">
+            <thead className="bg-[#2d1b11] text-white font-semibold uppercase tracking-wider border-b border-amber-900/60">
               <tr>
                 <th className="px-4 py-3">Dag &amp; Patta</th>
                 <th className="px-4 py-3">Farmer &amp; Location</th>
@@ -353,34 +353,34 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-stone-200">
               {filteredParcels.map((parcel) => (
-                <tr key={parcel.id} className="hover:bg-blue-50/50 transition-colors">
+                <tr key={parcel.id} className="hover:bg-amber-50/40 transition-colors">
                   <td className="px-4 py-3.5">
-                    <div className="font-bold text-blue-950">Dag #{parcel.dagNumber}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">Patta: {parcel.pattaNumber}</div>
+                    <div className="font-bold text-stone-900">Dag #{parcel.dagNumber}</div>
+                    <div className="text-[10px] text-stone-500 font-mono">Patta: {parcel.pattaNumber}</div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="font-semibold text-slate-900">{parcel.farmerName}</div>
-                    <div className="text-[10px] text-slate-500">{parcel.village}, {parcel.circle}</div>
+                    <div className="font-semibold text-stone-900">{parcel.farmerName}</div>
+                    <div className="text-[10px] text-stone-500">{parcel.village}, {parcel.circle}</div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="font-semibold text-blue-900">
+                    <span className="font-semibold text-amber-950">
                       {parcel.cropType.replace('_', ' ')}
                     </span>
-                    <span className="block text-[10px] text-slate-500">{parcel.cropVariety}</span>
+                    <span className="block text-[10px] text-stone-500">{parcel.cropVariety}</span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="font-mono font-medium text-slate-900">{parcel.areaBigha}B - {parcel.areaKatha}K - {parcel.areaLesa}L</span>
-                    <span className="block text-[10px] text-slate-500 font-mono">({parcel.areaHectares} Ha)</span>
+                    <span className="font-mono font-medium text-stone-900">{parcel.areaBigha}B - {parcel.areaKatha}K - {parcel.areaLesa}L</span>
+                    <span className="block text-[10px] text-stone-500 font-mono">({parcel.areaHectares} Ha)</span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="font-mono font-semibold text-blue-900">NDVI: {parcel.spectralIndices.ndvi}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">SAR: {parcel.spectralIndices.sarBackscatterVvDb} dB</div>
+                    <div className="font-mono font-semibold text-amber-900">NDVI: {parcel.spectralIndices.ndvi}</div>
+                    <div className="text-[10px] text-stone-500 font-mono">SAR: {parcel.spectralIndices.sarBackscatterVvDb} dB</div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="font-bold text-slate-900 font-mono">{parcel.estimatedYieldKgHa} kg/ha</div>
-                    <div className="text-[10px] text-slate-500 font-mono">{parcel.estimatedYieldQuintalBigha} Q/Bigha</div>
+                    <div className="font-bold text-stone-900 font-mono">{parcel.estimatedYieldKgHa} kg/ha</div>
+                    <div className="text-[10px] text-stone-500 font-mono">{parcel.estimatedYieldQuintalBigha} Q/Bigha</div>
                   </td>
                   <td className="px-4 py-3.5">
                     {parcel.yieldGrade === 'EXCELLENT' && (
@@ -389,7 +389,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                       </span>
                     )}
                     {parcel.yieldGrade === 'NORMAL' && (
-                      <span className="bg-blue-50 text-blue-800 border border-blue-300 px-2 py-0.5 rounded text-[10px] font-semibold">
+                      <span className="bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded text-[10px] font-semibold">
                         Normal
                       </span>
                     )}
@@ -410,7 +410,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                         ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                         : parcel.cceStatus === 'SCHEDULED'
                         ? 'bg-amber-50 text-amber-800 border border-amber-300'
-                        : 'bg-slate-100 text-slate-600 border border-slate-300'
+                        : 'bg-stone-100 text-stone-600 border border-stone-300'
                     }`}>
                       {parcel.cceStatus}
                     </span>
@@ -418,7 +418,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                   <td className="px-4 py-3.5 text-right">
                     <button
                       onClick={() => onSelectParcel(parcel)}
-                      className="text-xs bg-[#0c2340] hover:bg-blue-900 text-white px-2.5 py-1 rounded font-semibold transition-colors shadow-xs"
+                      className="text-xs bg-[#2d1b11] hover:bg-amber-900 text-white px-2.5 py-1 rounded font-semibold transition-colors shadow-xs cursor-pointer"
                     >
                       Inspect
                     </button>
@@ -433,3 +433,4 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     </div>
   );
 };
+export default ExecutiveDashboard;

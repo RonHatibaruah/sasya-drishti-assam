@@ -3,6 +3,7 @@ import { Navbar, ActiveTab } from './components/Navbar';
 import { ExecutiveDashboard } from './components/ExecutiveDashboard';
 import { CadastralMapViewer } from './components/CadastralMapViewer';
 import { FieldVerificationPortal } from './components/FieldVerificationPortal';
+import { DroneTechShowcase } from './components/DroneTechShowcase';
 import { CitizenHealthPortal } from './components/CitizenHealthPortal';
 import { AdminDashboard } from './components/AdminDashboard';
 import { RecordDetailModal } from './components/RecordDetailModal';
@@ -43,6 +44,7 @@ export function App() {
       if (hash === 'dashboard') setActiveTab('dashboard');
       else if (hash === 'satellite-gis' || hash === 'gis-map') setActiveTab('satellite-gis');
       else if (hash === 'drone-cce' || hash === 'field-verification') setActiveTab('drone-cce');
+      else if (hash === 'drone-tech' || hash === 'uav') setActiveTab('drone-tech');
       else if (hash === 'farmer-portal' || hash === 'citizen-portal') setActiveTab('farmer-portal');
       else if (hash === 'admin-console' || hash === 'admin') setActiveTab('admin-console');
       else if (hash === 'tutorial') setIsTutorialOpen(true);
@@ -124,7 +126,7 @@ export function App() {
   }, [districtSummaries]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fbfaf8] text-stone-900 flex flex-col font-sans">
       
       {/* Top Navbar */}
       <Navbar
@@ -172,6 +174,10 @@ export function App() {
           />
         )}
 
+        {activeTab === 'drone-tech' && (
+          <DroneTechShowcase />
+        )}
+
         {activeTab === 'farmer-portal' && (
           <CitizenHealthPortal
             parcels={parcels}
@@ -211,15 +217,15 @@ export function App() {
       />
 
       {/* Footer */}
-      <footer className="bg-[#0c2340] border-t border-blue-900 py-6 text-xs text-blue-200 mt-12 shadow-inner">
+      <footer className="bg-[#2d1b11] border-t border-amber-900/60 py-6 text-xs text-amber-200/80 mt-12 shadow-inner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span className="font-semibold text-white">SasyaDrishti (শস্য দৃষ্টি)</span>
-            <span className="text-blue-300">&bull;</span>
-            <span className="text-blue-200">NESFIC-D-12 Official Prototype</span>
+            <span className="text-amber-500/60">&bull;</span>
+            <span className="text-amber-200">NESFIC-D-12 Official Prototype</span>
           </div>
-          <div className="text-center md:text-right text-blue-300">
+          <div className="text-center md:text-right text-amber-200/80">
             Assam State Space Application Centre (ASSAC) &bull; Department of Science &amp; Technology, Government of Assam
           </div>
         </div>
