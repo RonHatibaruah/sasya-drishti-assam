@@ -96,7 +96,9 @@ def clean_inline_text(text):
         return ""
     t = text.strip()
     t = t.replace('₹', 'Rs. ')
-    t = t.replace('শস্য দৃষ্টি', 'SasyaDrishti')
+    t = t.replace('SasyaDrishti (শস্য দৃষ্টি)', 'SasyaDrishti')
+    t = t.replace('(শস্য দৃষ্টি)', '(Sasya Drishti)')
+    t = t.replace('শস্য দৃষ্টি', 'Sasya Drishti')
     t = t.replace('–', '-').replace('—', ' - ')
     t = t.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
     t = t.replace('≤', '&le;').replace('≥', '&ge;').replace('±', '&plusmn;')
@@ -429,7 +431,13 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
             i += 1
             code_lines = []
             while i < len(lines) and not lines[i].strip().startswith('```'):
-                code_lines.append(lines[i])
+                c_line = lines[i]
+                c_line = c_line.replace('─', '-').replace('━', '-').replace('│', '|').replace('┃', '|')
+                c_line = c_line.replace('┌', '+').replace('┐', '+').replace('└', '+').replace('┘', '+')
+                c_line = c_line.replace('├', '+').replace('┤', '+').replace('┬', '+').replace('┴', '+').replace('┼', '+')
+                c_line = c_line.replace('▼', 'v').replace('▲', '^').replace('►', '>').replace('◄', '<')
+                c_line = c_line.replace('•', '*').replace('…', '...')
+                code_lines.append(c_line)
                 i += 1
             i += 1
             code_str = "\n".join(code_lines)
@@ -511,11 +519,11 @@ def build_pdf(md_filename, pdf_filename, doc_title, subtitle):
     # Title Banner Box
     banner_data = [
         [
-            Paragraph(f"<b>{escape(doc_title)}</b>", styles['title']),
+            Paragraph(f"<b>{clean_inline_text(doc_title)}</b>", styles['title']),
             Paragraph(f"<b>NESFIC 2026</b><br/>Govt of Assam<br/>Dept of Science & Tech / ASSAC", styles['meta_banner'])
         ],
         [
-            Paragraph(escape(subtitle), styles['subtitle']),
+            Paragraph(clean_inline_text(subtitle), styles['subtitle']),
             Paragraph("Applicant: <b>Ron Hatibaruah</b><br/>Status: <b>Verified & Edge-Deployed</b>", styles['meta_banner'])
         ]
     ]
@@ -546,7 +554,7 @@ if __name__ == '__main__':
     build_pdf(
         'proposal_contents.md',
         'NESFIC_D12_Proposal_Ron_Hatibaruah.pdf',
-        'SasyaDrishti (শস্য দৃষ্টি) — NESFIC-D-12 Proposal',
+        'SasyaDrishti — NESFIC-D-12 Proposal',
         'AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data'
     )
     

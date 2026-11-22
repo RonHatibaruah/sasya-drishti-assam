@@ -2,7 +2,7 @@
 ## Problem Statement: NESFIC-D-12 — Crop Yield & Production Estimation Using Satellite/UAV and Field Data
 **Sponsoring Department:** Assam State Space Application Centre (ASSAC), Department of Science & Technology, Government of Assam (in collaboration with Directorate of Agriculture, Assam)  
 **Applicant / Innovator:** Ron Hatibaruah  
-**Proposed Solution Name:** SasyaDrishti (শস্য দৃষ্টি) — AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data  
+**Proposed Solution Name:** SasyaDrishti (Sasya Drishti) — AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data  
 **Live Production URL:** `https://sasya-drishti-assam.pages.dev/`  
 **GitHub Repository:** `https://github.com/RonHatibaruah/sasya-drishti-assam`
 
@@ -36,7 +36,7 @@ SasyaDrishti bridges the operational divide between space-borne earth observatio
 *(Word Count Target: 430–480 words | Limit: 500 words)*
 
 ### Proposed Solution Overview
-**SasyaDrishti (শস্য দৃষ্টি)** is an AI-powered, multi-tier agricultural remote sensing and crop yield prediction platform purpose-built for the unique agro-climatic conditions of Assam. Operating as an intelligent decision-support layer for ASSAC and the Directorate of Agriculture, it fuses **Sentinel-1 all-weather C-band microwave radar (SAR)**, **Sentinel-2 high-resolution optical imagery**, **UAV drone multispectral orthomosaics**, and **digital mobile Crop Cutting Experiment (CCE) ground-truthing** into a unified, hybrid predictive AI pipeline.
+**SasyaDrishti (Sasya Drishti)** is an AI-powered, multi-tier agricultural remote sensing and crop yield prediction platform purpose-built for the unique agro-climatic conditions of Assam. Operating as an intelligent decision-support layer for ASSAC and the Directorate of Agriculture, it fuses **Sentinel-1 all-weather C-band microwave radar (SAR)**, **Sentinel-2 high-resolution optical imagery**, **UAV drone multispectral orthomosaics**, and **digital mobile Crop Cutting Experiment (CCE) ground-truthing** into a unified, hybrid predictive AI pipeline.
 
 ### Main Modules & Core Functions
 1. **All-Weather Cloud-Penetrating Remote Sensing Engine:**
@@ -356,7 +356,7 @@ graph TD
 ### Novelty, Prior Art & Technological Differentiation
 Existing agricultural yield estimation programs in India (such as the national **FASAL** project, **MNCFC (Mahalanobis National Crop Forecast Centre)** guidelines, and state revenue eye-estimates) provide broad district-level acreage statistics. However, they fail in northeastern smallholder contexts due to three critical technological blindspots.
 
-| Comparison Parameter | Conventional State Approach (Eye-Estimates & CCE) | National Programs (FASAL / MNCFC) | SasyaDrishti (শস্য দৃষ্টি) Innovation |
+| Comparison Parameter | Conventional State Approach (Eye-Estimates & CCE) | National Programs (FASAL / MNCFC) | SasyaDrishti (Sasya Drishti) Innovation |
 | :--- | :--- | :--- | :--- |
 | **Monsoon Cloud Penetration** | N/A (Manual field visits only) | Severe degradation (70–85% optical cloud blockage) | **100% All-Weather Microwave SAR Radar (Sentinel-1 C-Band)** |
 | **Spatial Resolution** | Plot-level but subjective & sparse | Coarse satellite (250m MODIS / 10m Optical) | **Sub-5cm Centimeter UAV Drone Multispectral Scans** |

@@ -1,5 +1,5 @@
 # Proof of Work & Solution Evidence Dossier
-## SasyaDrishti (শস্য দৃষ্টি): Assam Crop Yield & Production Estimation Platform
+## SasyaDrishti (Sasya Drishti): Assam Crop Yield & Production Estimation Platform
 **Submission Category:** NESFIC 2026 (Government Track) — Problem Statement **NESFIC-D-12**  
 **Challenge Owners:** Assam State Space Application Centre (ASSAC), Department of Science & Technology, Government of Assam (in collaboration with Directorate of Agriculture, Assam)  
 **Lead Innovator & Applicant:** Ron Hatibaruah  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Prototype Status
 
-As mandated by the Assam Startup NESFIC 2026 Uniform Solution Proposal Requirements (USPR), this document provides empirical **Proof of Work (PoW)**, architectural validation, live portal telemetry, and test benchmark results demonstrating a fully operational, high-fidelity software prototype of **SasyaDrishti (শস্য দৃষ্টি)**.
+As mandated by the Assam Startup NESFIC 2026 Uniform Solution Proposal Requirements (USPR), this document provides empirical **Proof of Work (PoW)**, architectural validation, live portal telemetry, and test benchmark results demonstrating a fully operational, high-fidelity software prototype of **SasyaDrishti (Sasya Drishti)**.
 
 The prototype successfully demonstrates:
 1. **Multi-tier remote sensing ingestion** fusing Sentinel-1 C-band SAR radar, Sentinel-2 optical multispectral imagery, and UAV drone surveys.
