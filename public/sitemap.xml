@@ -3,8 +3,8 @@
         xmlns:geo="http://www.google.com/geo/schemas/sitemap/1.0">
   <!-- Main Application Landing Page -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/</loc>
-    <lastmod>2026-11-21</lastmod>
+    <loc>https://sasya-drishti.pages.dev/</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <geo:geo>
@@ -12,51 +12,43 @@
     </geo:geo>
   </url>
 
-  <!-- Executive Analytics & Cadastral Health Register -->
+  <!-- Executive Analytics & Crop Yield Dashboard -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/#dashboard</loc>
-    <lastmod>2026-11-21</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://sasya-drishti.pages.dev/#dashboard</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Cadastral WebGIS Parcel Inspector -->
+  <!-- Multi-Tier Remote Sensing & Drone WebGIS Map -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/#gis-map</loc>
-    <lastmod>2026-11-21</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://sasya-drishti.pages.dev/#satellite-gis</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Lat Mandal Field Ground-Truthing Roster -->
+  <!-- UAV Drone Missions & Crop Cutting Experiments (CCE) -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/#field-verification</loc>
-    <lastmod>2026-11-21</lastmod>
+    <loc>https://sasya-drishti.pages.dev/#drone-cce</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Citizen Land Health Certificate & Pre-Emptive Portal -->
+  <!-- Farmer Crop Advisory & MSP Yield Certificate Portal -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/#citizen-portal</loc>
-    <lastmod>2026-11-21</lastmod>
+    <loc>https://sasya-drishti.pages.dev/#farmer-portal</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Interactive Tutorial & Mission Basundhara Integration Guide -->
+  <!-- Super Admin AI/ML Calibration & Ingestion Command Center -->
   <url>
-    <loc>https://bhumi-swasthya.pages.dev/#tutorial</loc>
-    <lastmod>2026-11-21</lastmod>
+    <loc>https://sasya-drishti.pages.dev/#admin-console</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-
-  <!-- Super Admin Control Console & Rule Calibration Engine -->
-  <url>
-    <loc>https://bhumi-swasthya.pages.dev/#admin</loc>
-    <lastmod>2026-11-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>
 </urlset>

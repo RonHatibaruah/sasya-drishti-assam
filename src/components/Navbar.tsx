@@ -1,25 +1,40 @@
 import React from 'react';
-import { ShieldCheck, Map, ClipboardList, UserCheck, Activity, Building2, BookOpen, Sliders } from 'lucide-react';
+import { 
+  Sprout, 
+  Satellite, 
+  Plane, 
+  FileCheck2, 
+  Sliders, 
+  BookOpen, 
+  Building2, 
+  Calendar,
+  CloudSun
+} from 'lucide-react';
+import { CropSeason } from '../types/cropYield';
 
-export type ActiveTab = 'dashboard' | 'gis-map' | 'field-verification' | 'citizen-portal' | 'admin';
+export type ActiveTab = 'dashboard' | 'satellite-gis' | 'drone-cce' | 'farmer-portal' | 'admin-console';
 
 interface NavbarProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
-  selectedCircle: string;
-  setSelectedCircle: (circle: string) => void;
-  totalRecords: number;
-  criticalCount: number;
+  selectedDistrict: string;
+  setSelectedDistrict: (district: string) => void;
+  selectedSeason: CropSeason;
+  setSelectedSeason: (season: CropSeason) => void;
+  totalParcels: number;
+  totalHectares: number;
   onOpenTutorial: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
-  selectedCircle,
-  setSelectedCircle,
-  totalRecords,
-  criticalCount,
+  selectedDistrict,
+  setSelectedDistrict,
+  selectedSeason,
+  setSelectedSeason,
+  totalParcels,
+  totalHectares,
   onOpenTutorial
 }) => {
   return (
@@ -30,20 +45,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span className="font-medium text-slate-200">Government of Assam</span>
           <span className="text-slate-500">•</span>
-          <span>Revenue & Disaster Management Department</span>
+          <span>Dept of Science &amp; Technology — ASSAC</span>
           <span className="text-slate-500">•</span>
-          <span className="text-amber-400 font-semibold">NESFIC-D-50 Pilot Solution</span>
+          <span className="text-amber-400 font-semibold">NESFIC-D-12 Official Prototype</span>
         </div>
         <div className="flex items-center space-x-4">
-          <span className="text-slate-400">Dharitree & Bhudakshya Active Sync</span>
-          <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono">
-            {totalRecords} Parcels Audited
+          <div className="hidden sm:flex items-center space-x-1.5 text-slate-400">
+            <CloudSun className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Sentinel-1 SAR Radar 100% Cloud-Penetrating</span>
+          </div>
+          <span className="bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono">
+            {totalHectares.toLocaleString()} Ha Monitored ({totalParcels} Pilot Plots)
           </span>
-          {criticalCount > 0 && (
-            <span className="bg-red-950 text-red-300 border border-red-800 px-2 py-0.5 rounded text-[11px] font-semibold animate-pulse">
-              {criticalCount} Critical Flags
-            </span>
-          )}
+          <span className="bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded text-[11px] font-semibold">
+            ASSAC &amp; Agri Dept Live Sync
+          </span>
         </div>
       </div>
 
@@ -53,25 +69,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Logo & Title */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-900/30">
-              <ShieldCheck className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-emerald-600 via-teal-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-900/40">
+              <Sprout className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                  BhumiSwasthya <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-normal">ভূমি স্বাস্থ্য</span>
+                  SasyaDrishti <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-normal">শস্য দৃষ্টি</span>
                 </h1>
               </div>
               <p className="text-xs text-slate-400">
-                Automated Land Record Health-Check & Anomaly Detection Engine
+                Crop Yield &amp; Production Estimation Platform Using Satellite/UAV &amp; Field Data
               </p>
             </div>
           </div>
 
-          {/* Navigation Controls, Role Switcher & Tutorial Link */}
+          {/* Navigation Controls, Filters & Guide */}
           <div className="flex flex-wrap items-center gap-2">
             
-            {/* Tutorial Link / Button */}
+            {/* Guide Button */}
             <a
               href="#tutorial"
               onClick={(e) => {
@@ -79,113 +95,140 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenTutorial();
               }}
               className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-all ring-1 ring-emerald-400/30"
-              title="Learn what this app does, how to use it, and view the system architecture guide"
+              title="Learn system architecture, satellite-UAV fusion, and operational workflow"
               aria-label="Open Interactive Tutorial & System Guide"
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>Tutorial & Guide</span>
+              <span>Architecture Guide</span>
             </a>
 
-            {/* Circle Filter */}
+            {/* Season Selector */}
             <div className="flex items-center space-x-1.5 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs">
-              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+              <Calendar className="w-3.5 h-3.5 text-amber-400" />
               <select
-                value={selectedCircle}
-                onChange={(e) => setSelectedCircle(e.target.value)}
+                value={selectedSeason}
+                onChange={(e) => setSelectedSeason(e.target.value as CropSeason)}
                 className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer pr-1"
-                aria-label="Filter records by Assam Revenue Circle"
-                title="Select Assam Revenue Circle"
+                aria-label="Select Agricultural Crop Season"
+                title="Select Agricultural Crop Season"
               >
-                <option value="ALL" className="bg-slate-900">All Revenue Circles</option>
-                <option value="Dispur" className="bg-slate-900">Dispur (Kamrup Metro)</option>
-                <option value="Sonapur" className="bg-slate-900">Sonapur (Tribal Belt)</option>
-                <option value="Kaliabor" className="bg-slate-900">Kaliabor (Nagaon)</option>
+                <option value="KHARIF_2026" className="bg-slate-900">Kharif 2026 (Sali Paddy)</option>
+                <option value="RABI_2025_26" className="bg-slate-900">Rabi 2025-26 (Mustard / Boro)</option>
+                <option value="SUMMER_2026" className="bg-slate-900">Summer 2026 (Ahu / Jute)</option>
               </select>
             </div>
 
-            {/* Tab Links - SEO and GEO Friendly */}
-            <nav className="inline-flex rounded-lg bg-slate-800 p-1 border border-slate-700" aria-label="Main Application Views">
-              <a
-                href="#dashboard"
-                onClick={(e) => { e.preventDefault(); setActiveTab('dashboard'); }}
-                title="Executive Analytics & Cadastral Health Register Dashboard (Assam Revenue Circles)"
-                aria-label="View Executive Analytics Dashboard"
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === 'dashboard'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
-                }`}
+            {/* District Filter */}
+            <div className="flex items-center space-x-1.5 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs">
+              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
+                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer pr-1"
+                aria-label="Filter by Assam District"
+                title="Select Assam District"
               >
-                <Activity className="w-3.5 h-3.5" />
-                <span>Executive Analytics</span>
-              </a>
-
-              <a
-                href="#gis-map"
-                onClick={(e) => { e.preventDefault(); setActiveTab('gis-map'); }}
-                title="Cadastral WebGIS Parcel Inspector & Overlap Conflict Viewer (Bhudakshya & Satellite)"
-                aria-label="View Cadastral WebGIS Parcel Map"
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === 'gis-map'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
-                }`}
-              >
-                <Map className="w-3.5 h-3.5" />
-                <span>Cadastral GIS Map</span>
-              </a>
-
-              <a
-                href="#field-verification"
-                onClick={(e) => { e.preventDefault(); setActiveTab('field-verification'); }}
-                title="Lat Mandal Field Verification Queue & Offline Ground-Truthing Roster"
-                aria-label="View Lat Mandal Field Queue"
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === 'field-verification'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
-                }`}
-              >
-                <ClipboardList className="w-3.5 h-3.5" />
-                <span>Field Mandal Queue</span>
-              </a>
-
-              <a
-                href="#citizen-portal"
-                onClick={(e) => { e.preventDefault(); setActiveTab('citizen-portal'); }}
-                title="Citizen Land Health Card Self-Check Portal & Pre-Emptive Mutation Fast-Track"
-                aria-label="View Citizen Land Health Portal"
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === 'citizen-portal'
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-amber-300/80 hover:text-amber-200 hover:bg-slate-700/60'
-                }`}
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>Citizen Self-Check</span>
-              </a>
-
-              <a
-                href="#admin"
-                onClick={(e) => { e.preventDefault(); setActiveTab('admin'); }}
-                title="Super Admin Command Console: Rule Engine Calibration, Officer Roster, Data Sentry & Audit Trail"
-                aria-label="View Super Admin Command Console"
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === 'admin'
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm ring-1 ring-amber-400/50'
-                    : 'text-amber-300/90 hover:text-white hover:bg-slate-700/60'
-                }`}
-              >
-                <Sliders className="w-3.5 h-3.5" />
-                <span>Admin Command</span>
-              </a>
-            </nav>
+                <option value="ALL" className="bg-slate-900">All Assam Districts</option>
+                <option value="Kamrup Metro" className="bg-slate-900">Kamrup Metro</option>
+                <option value="Nagaon" className="bg-slate-900">Nagaon</option>
+                <option value="Barpeta" className="bg-slate-900">Barpeta</option>
+                <option value="Golaghat" className="bg-slate-900">Golaghat</option>
+                <option value="Darrang" className="bg-slate-900">Darrang</option>
+                <option value="Cachar" className="bg-slate-900">Cachar (Barak Valley)</option>
+              </select>
+            </div>
 
           </div>
-
         </div>
+
+        {/* Tab Navigation Buttons */}
+        <nav className="flex space-x-1 mt-4 overflow-x-auto pb-1" aria-label="Portal Navigation Tabs">
+          <a
+            href="#dashboard"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('dashboard');
+              window.history.pushState(null, '', '#dashboard');
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'dashboard'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Sprout className="w-4 h-4" />
+            <span>Executive Dashboard</span>
+          </a>
+
+          <a
+            href="#satellite-gis"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('satellite-gis');
+              window.history.pushState(null, '', '#satellite-gis');
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'satellite-gis'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Satellite className="w-4 h-4" />
+            <span>Satellite &amp; Drone WebGIS</span>
+          </a>
+
+          <a
+            href="#drone-cce"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('drone-cce');
+              window.history.pushState(null, '', '#drone-cce');
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'drone-cce'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Plane className="w-4 h-4" />
+            <span>Drone Operations &amp; CCE</span>
+          </a>
+
+          <a
+            href="#farmer-portal"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('farmer-portal');
+              window.history.pushState(null, '', '#farmer-portal');
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'farmer-portal'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <FileCheck2 className="w-4 h-4" />
+            <span>Farmer Advisory &amp; Certificate</span>
+          </a>
+
+          <a
+            href="#admin-console"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('admin-console');
+              window.history.pushState(null, '', '#admin-console');
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'admin-console'
+                ? 'bg-slate-700 text-emerald-300 border border-emerald-500/30 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Sliders className="w-4 h-4 text-emerald-400" />
+            <span>Admin Command Center</span>
+          </a>
+        </nav>
       </div>
     </header>
   );
 };
-

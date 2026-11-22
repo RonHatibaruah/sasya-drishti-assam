@@ -1,106 +1,90 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  ShieldCheck, 
-  AlertTriangle, 
-  AlertOctagon, 
+  BarChart3, 
+  TrendingUp, 
+  TrendingDown, 
+  ShieldAlert, 
+  Plane, 
   CheckCircle2, 
-  IndianRupee, 
-  Search, 
+  Satellite, 
   Download, 
-  Filter, 
-  MapPin, 
-  ArrowRight,
-  ExternalLink,
-  Layers,
-  Sparkles
+  Layers, 
+  ArrowUpRight, 
+  AlertTriangle,
+  Waves,
+  Search,
+  Filter
 } from 'lucide-react';
-import { LandRecord, HealthGrade, AnomalyType } from '../types/landRecords';
-import { formatBKL } from '../services/healthCheckEngine';
+import { CropParcelRecord, DistrictSummary } from '../types/cropYield';
+import { kgHaToQuintalsPerBigha } from '../services/cropYieldEngine';
 
 interface ExecutiveDashboardProps {
-  records: LandRecord[];
-  onSelectRecord: (record: LandRecord) => void;
-  onDispatchToMandal: (record: LandRecord) => void;
+  parcels: CropParcelRecord[];
+  districtSummaries: DistrictSummary[];
+  selectedDistrict: string;
+  onSelectParcel: (parcel: CropParcelRecord) => void;
+  onNavigateToTab: (tab: any) => void;
 }
 
 export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
-  records,
-  onSelectRecord,
-  onDispatchToMandal
+  parcels,
+  districtSummaries,
+  selectedDistrict,
+  onSelectParcel,
+  onNavigateToTab
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState<string>('ALL');
-  const [selectedAnomalyType, setSelectedAnomalyType] = useState<string>('ALL');
+  const [filterCrop, setFilterCrop] = useState<string>('ALL');
 
-  // Compute Metrics
-  const metrics = useMemo(() => {
-    const total = records.length;
-    const gradeA = records.filter(r => r.healthReport.grade === 'GRADE_A').length;
-    const gradeB = records.filter(r => r.healthReport.grade === 'GRADE_B').length;
-    const gradeC = records.filter(r => r.healthReport.grade === 'GRADE_C').length;
-    const gradeD = records.filter(r => r.healthReport.grade === 'GRADE_D').length;
-    
-    const totalRevenue = records.reduce((sum, r) => sum + r.annualRevenueRs, 0);
-    const revenueAtRisk = records
-      .filter(r => r.healthReport.grade === 'GRADE_D' || r.annualRevenueRs === 0)
-      .reduce((sum, r) => sum + (r.annualRevenueRs === 0 ? 500 : r.annualRevenueRs), 0);
-    
-    const avgScore = total > 0 
-      ? Math.round(records.reduce((sum, r) => sum + r.healthReport.score, 0) / total)
-      : 0;
+  // Filter district summaries based on selected district
+  const filteredSummaries = selectedDistrict === 'ALL'
+    ? districtSummaries
+    : districtSummaries.filter(d => d.district.toLowerCase() === selectedDistrict.toLowerCase());
 
-    return { total, gradeA, gradeB, gradeC, gradeD, totalRevenue, revenueAtRisk, avgScore };
-  }, [records]);
+  // Aggregate telemetry
+  const totalMonitoredHectares = filteredSummaries.reduce((acc, d) => acc + d.monitoredHectares, 0);
+  const totalProductionTonnes = filteredSummaries.reduce((acc, d) => acc + d.estimatedProductionTonnes, 0);
+  const avgYieldKgHa = totalMonitoredHectares > 0 
+    ? Math.round(filteredSummaries.reduce((acc, d) => acc + (d.averageYieldKgHa * d.monitoredHectares), 0) / totalMonitoredHectares)
+    : 0;
+  const avgYieldQuintalsBigha = kgHaToQuintalsPerBigha(avgYieldKgHa);
 
-  // Filter records
-  const filteredRecords = useMemo(() => {
-    return records.filter(record => {
-      // Search filter
-      const matchesSearch = 
-        record.dagNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.pattaNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.village.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.circle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.pattadars.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const totalCceCompleted = filteredSummaries.reduce((acc, d) => acc + d.cceCompletedCount, 0);
+  const totalCceTarget = filteredSummaries.reduce((acc, d) => acc + d.cceTargetCount, 0);
+  const cceProgressPercent = Math.round((totalCceCompleted / (totalCceTarget || 1)) * 100);
 
-      if (!matchesSearch) return false;
+  // Filtered parcels table
+  const filteredParcels = parcels.filter(p => {
+    const matchesDistrict = selectedDistrict === 'ALL' || p.district.toLowerCase() === selectedDistrict.toLowerCase();
+    const matchesCrop = filterCrop === 'ALL' || p.cropType === filterCrop;
+    const matchesSearch = 
+      p.dagNumber.includes(searchQuery) || 
+      p.farmerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      p.village.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.farmerId.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesDistrict && matchesCrop && matchesSearch;
+  });
 
-      // Grade filter
-      if (selectedGrade !== 'ALL' && record.healthReport.grade !== selectedGrade) {
-        return false;
-      }
+  const floodAffectedParcels = parcels.filter(p => p.floodInundated);
 
-      // Anomaly type filter
-      if (selectedAnomalyType !== 'ALL') {
-        const hasType = record.healthReport.anomalies.some(a => a.type === selectedAnomalyType);
-        if (!hasType) return false;
-      }
-
-      return true;
-    });
-  }, [records, searchQuery, selectedGrade, selectedAnomalyType]);
-
-  const exportCSV = () => {
-    const headers = ['Dag No', 'Patta No', 'Village', 'Circle', 'Land Class', 'Jamabandi Area', 'Cadastral Area', 'Health Score', 'Grade', 'Risk Status', 'Anomalies'];
-    const rows = filteredRecords.map(r => [
-      r.dagNumber,
-      r.pattaNumber,
-      r.village,
-      r.circle,
-      r.landClass,
-      formatBKL(r.jamabandiArea),
-      formatBKL(r.cadastralAreaBKL),
-      r.healthReport.score,
-      r.healthReport.grade,
-      r.healthReport.riskStatus,
-      r.healthReport.anomalies.map(a => a.title).join('; ')
+  const exportSummaryCsv = () => {
+    const headers = ['District', 'Monitored Hectares', 'Monitored Bighas', 'Est. Production (MT)', 'Avg Yield (kg/ha)', 'Normal Benchmark (kg/ha)', 'Yield Anomaly %', 'CCE Completed', 'CCE Target'];
+    const rows = districtSummaries.map(d => [
+      d.district,
+      d.monitoredHectares,
+      d.monitoredBighas,
+      d.estimatedProductionTonnes,
+      d.averageYieldKgHa,
+      d.normalBenchmarkYieldKgHa,
+      d.yieldAnomalyPercent,
+      d.cceCompletedCount,
+      d.cceTargetCount
     ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.map(i => `"${i}"`).join(','))].join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Assam_Land_Health_Audit_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Assam_Crop_Yield_Summary_NESFIC_D12.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -109,337 +93,335 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Policy Advisory Banner */}
-      <div className="bg-gradient-to-r from-emerald-900/40 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
-              NESFIC-D-50 Compliance
-            </span>
-            <span className="text-xs text-slate-400">Decision-Support Sandbox</span>
+      {/* Flood Impact & Severe Anomaly Alert Banner */}
+      {floodAffectedParcels.length > 0 && (
+        <div className="bg-amber-950/70 border border-amber-800/80 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-200">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-amber-900/60 rounded-lg border border-amber-700/60 text-amber-400">
+              <Waves className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm text-amber-100 flex items-center gap-2">
+                Brahmaputra Flood Inundation &amp; Crop Stress Advisory Active
+                <span className="text-[10px] bg-red-900/80 text-red-300 px-2 py-0.5 rounded-full border border-red-700">Sentinel-1 SAR Verified</span>
+              </h4>
+              <p className="text-xs text-amber-300/90 mt-0.5">
+                Barpeta (Baghbar Char) exhibits heavy waterlogging (SAR Backscatter &le; -17.5 dB). Estimated yield deficit of 10.2% detected. Crop Insurance (PMFBY) pre-assessment initiated.
+              </p>
+            </div>
           </div>
-          <h2 className="text-lg font-bold text-white mt-1">
-            Assam Cadastral & RoR Pre-Emptive Health Audit
-          </h2>
-          <p className="text-xs text-slate-300 max-w-3xl">
-            Proactively identifying spatial overlaps, tenure share deficits, revenue leakage, and tribal belt inconsistencies across digitized rolls before citizen transactions trigger disputes.
-          </p>
+          <button
+            onClick={() => onNavigateToTab('satellite-gis')}
+            className="text-xs bg-amber-800/80 hover:bg-amber-700 text-amber-100 px-3 py-1.5 rounded-lg border border-amber-600 transition-colors whitespace-nowrap flex items-center gap-1.5 font-medium"
+          >
+            <span>View SAR Flood Mask</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
         </div>
+      )}
 
-        <button
-          onClick={exportCSV}
-          className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all whitespace-nowrap"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Export Audit Report (CSV)</span>
-        </button>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+      {/* Top Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Total Audited */}
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Audited Parcels</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{metrics.total}</h3>
-            </div>
-            <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-              <Layers className="w-5 h-5" />
-            </div>
+        {/* Monitored Acreage */}
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-medium uppercase tracking-wider">Monitored Acreage</span>
+            <Satellite className="w-4 h-4 text-emerald-400" />
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">
-            Average Health Index: <span className="font-semibold text-slate-800">{metrics.avgScore}/100</span>
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl font-bold text-white">
+              {(totalMonitoredHectares / 1000).toFixed(1)}k
+            </span>
+            <span className="text-xs text-slate-400">Hectares</span>
+          </div>
+          <p className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>100% SAR Cloud-Free Coverage</span>
           </p>
         </div>
 
-        {/* Grade A - Healthy */}
-        <div className="bg-white rounded-xl p-4 border border-emerald-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Grade A (Clean)</p>
-              <h3 className="text-2xl font-bold text-emerald-700 mt-1">{metrics.gradeA}</h3>
-            </div>
-            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
+        {/* Projected Production */}
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-medium uppercase tracking-wider">Projected Production</span>
+            <BarChart3 className="w-4 h-4 text-cyan-400" />
           </div>
-          <p className="text-[11px] text-emerald-600 mt-2 font-medium">
-            Straight-Through Ready ({Math.round((metrics.gradeA / (metrics.total || 1)) * 100)}%)
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl font-bold text-white">
+              {(totalProductionTonnes / 100000).toFixed(2)}
+            </span>
+            <span className="text-xs text-slate-400">Lakh Metric Tonnes</span>
+          </div>
+          <p className="text-xs text-slate-300 mt-2 flex items-center gap-1">
+            <span>FCI &amp; AFCSCL Procurement Target: 94% Met</span>
           </p>
         </div>
 
-        {/* Grade B & C - Moderate Risk */}
-        <div className="bg-white rounded-xl p-4 border border-amber-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-amber-700 uppercase tracking-wide">Grade B/C (Moderate)</p>
-              <h3 className="text-2xl font-bold text-amber-700 mt-1">{metrics.gradeB + metrics.gradeC}</h3>
-            </div>
-            <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
+        {/* Average Projected Yield */}
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-medium uppercase tracking-wider">State Average Yield</span>
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
-          <p className="text-[11px] text-amber-600 mt-2">
-            Requires Desk Reconciliation
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl font-bold text-white">{avgYieldKgHa}</span>
+            <span className="text-xs text-slate-400">kg/ha ({avgYieldQuintalsBigha} Q/Bigha)</span>
+          </div>
+          <p className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>+3.4% above 5-Year Normal</span>
           </p>
         </div>
 
-        {/* Grade D - Critical */}
-        <div className="bg-white rounded-xl p-4 border border-rose-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-rose-700 uppercase tracking-wide">Grade D (Critical)</p>
-              <h3 className="text-2xl font-bold text-rose-700 mt-1">{metrics.gradeD}</h3>
-            </div>
-            <div className="p-2 bg-rose-50 rounded-lg text-rose-600">
-              <AlertOctagon className="w-5 h-5" />
-            </div>
+        {/* Ground Truth CCE Validation */}
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-medium uppercase tracking-wider">Field CCE Ground-Truth</span>
+            <CheckCircle2 className="w-4 h-4 text-teal-400" />
           </div>
-          <p className="text-[11px] text-rose-600 mt-2 font-medium">
-            Overlaps / Tribal Violations
-          </p>
-        </div>
-
-        {/* Revenue at Risk */}
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm col-span-2 md:col-span-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Revenue Gap / Risk</p>
-              <h3 className="text-xl font-bold text-slate-900 mt-1 flex items-center">
-                <IndianRupee className="w-4 h-4 mr-0.5 text-slate-700" />
-                {metrics.revenueAtRisk.toLocaleString('en-IN')}
-              </h3>
-            </div>
-            <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-              <IndianRupee className="w-5 h-5" />
-            </div>
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl font-bold text-white">{totalCceCompleted} / {totalCceTarget}</span>
+            <span className="text-xs text-slate-400">Cuts Done</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">
-            From zero/unassessed touzi
-          </p>
+          <div className="w-full bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+            <div 
+              className="bg-teal-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, cceProgressPercent)}%` }}
+            ></div>
+          </div>
         </div>
 
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-3">
-        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-          
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Dag No (e.g. 101, 103), Patta No, Village, or Pattadar..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 placeholder-slate-400"
-            />
-          </div>
-
-          {/* Filter Dropdowns */}
-          <div className="flex flex-wrap items-center gap-2">
-            
-            {/* Grade Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="bg-transparent text-slate-700 text-xs focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">All Health Grades</option>
-                <option value="GRADE_A">Grade A (Healthy 85-100)</option>
-                <option value="GRADE_B">Grade B (Minor 65-84)</option>
-                <option value="GRADE_C">Grade C (Moderate 40-64)</option>
-                <option value="GRADE_D">Grade D (Critical &lt; 40)</option>
-              </select>
-            </div>
-
-            {/* Anomaly Category */}
-            <div className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
-              <select
-                value={selectedAnomalyType}
-                onChange={(e) => setSelectedAnomalyType(e.target.value)}
-                className="bg-transparent text-slate-700 text-xs focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">All Anomaly Types</option>
-                <option value="SPATIAL_AREA_MISMATCH">Spatial Area Mismatch</option>
-                <option value="SPATIAL_OVERLAP">Cadastral Boundary Overlap</option>
-                <option value="SHARE_SUM_MISMATCH">Pattadar Share Drift</option>
-                <option value="ZERO_OR_NULL_REVENUE">Zero Land Revenue</option>
-                <option value="PROTECTED_LAND_ENCROACHMENT">Tribal / VGR Encroachment</option>
-                <option value="UNRESOLVED_ENCUMBRANCE">Unresolved Mortgage / Stay</option>
-              </select>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* Main Records Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+      {/* District Intelligence Leaderboard */}
+      <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">
-              Cadastral Parcel Health Register ({filteredRecords.length})
+            <h3 className="text-base font-semibold text-white flex items-center gap-2">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              <span>Assam District Remote Sensing &amp; Yield Leaderboard</span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Evaluated across 7 legal & spatial consistency dimensions
+            <p className="text-xs text-slate-400 mt-0.5">
+              Multi-source yield forecasting across Brahmaputra and Barak agro-climatic zones
             </p>
           </div>
-          <span className="text-xs text-slate-500">
-            Click on any row to open full technical audit
-          </span>
+          <button
+            onClick={exportSummaryCsv}
+            className="flex items-center space-x-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-600 transition-colors self-start sm:self-auto"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-300" />
+            <span>Export District CSV</span>
+          </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-600">
-            <thead className="bg-slate-100/75 text-slate-700 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-900/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700">
               <tr>
-                <th className="py-3 px-4">Parcel Identity</th>
-                <th className="py-3 px-4">Location</th>
-                <th className="py-3 px-4">Land Class & Patta</th>
-                <th className="py-3 px-4">Jamabandi Area</th>
-                <th className="py-3 px-4">GIS Cadastral Area</th>
-                <th className="py-3 px-4 text-center">Health Score</th>
-                <th className="py-3 px-4">Detected Risk / Flags</th>
-                <th className="py-3 px-4 text-right">Action</th>
+                <th className="px-4 py-3">District</th>
+                <th className="px-4 py-3">Monitored Area</th>
+                <th className="px-4 py-3">Est. Production</th>
+                <th className="px-4 py-3">Avg. Yield</th>
+                <th className="px-4 py-3">Yield Anomaly</th>
+                <th className="px-4 py-3">SAR Coverage</th>
+                <th className="px-4 py-3">Drone Density</th>
+                <th className="px-4 py-3">CCE Progress</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredRecords.map((record) => {
-                const report = record.healthReport;
-                const isGradeA = report.grade === 'GRADE_A';
-                const isGradeD = report.grade === 'GRADE_D';
-                const isGradeC = report.grade === 'GRADE_C';
-
-                return (
-                  <tr 
-                    key={record.id}
-                    onClick={() => onSelectRecord(record)}
-                    className="hover:bg-slate-50 cursor-pointer transition-colors"
-                  >
-                    {/* Parcel Identity */}
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-slate-900">Dag {record.dagNumber}</div>
-                      <div className="text-[11px] text-slate-500">Patta: {record.pattaNumber}</div>
-                    </td>
-
-                    {/* Location */}
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-800 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-slate-400" />
-                        {record.village}
+            <tbody className="divide-y divide-slate-700/60">
+              {filteredSummaries.map((summary) => (
+                <tr key={summary.district} className="hover:bg-slate-700/40 transition-colors">
+                  <td className="px-4 py-3.5 font-medium text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>{summary.district}</span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {summary.monitoredHectares.toLocaleString()} Ha
+                    <span className="block text-[10px] text-slate-500">({summary.monitoredBighas.toLocaleString()} Bighas)</span>
+                  </td>
+                  <td className="px-4 py-3.5 font-mono text-cyan-300">
+                    {summary.estimatedProductionTonnes.toLocaleString()} MT
+                  </td>
+                  <td className="px-4 py-3.5 font-semibold text-white">
+                    {summary.averageYieldKgHa} kg/ha
+                    <span className="block text-[10px] text-slate-400 font-normal">
+                      {kgHaToQuintalsPerBigha(summary.averageYieldKgHa)} Q/Bigha
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {summary.yieldAnomalyPercent >= 0 ? (
+                      <span className="inline-flex items-center text-emerald-400 font-semibold gap-0.5">
+                        <TrendingUp className="w-3 h-3" />
+                        +{summary.yieldAnomalyPercent}%
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center text-red-400 font-semibold gap-0.5">
+                        <TrendingDown className="w-3 h-3" />
+                        {summary.yieldAnomalyPercent}%
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="bg-emerald-950/80 text-emerald-400 px-2 py-0.5 rounded text-[11px] font-mono border border-emerald-800">
+                      {summary.sarPenetrationCoveragePercent}%
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 font-mono text-slate-300">
+                    {summary.droneCoveragePercent}%
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono">{summary.cceCompletedCount}/{summary.cceTargetCount}</span>
+                      <div className="w-16 bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-emerald-500 h-full rounded-full" 
+                          style={{ width: `${Math.round((summary.cceCompletedCount / summary.cceTargetCount) * 100)}%` }}
+                        ></div>
                       </div>
-                      <div className="text-[11px] text-slate-500">{record.circle} Circle</div>
-                    </td>
-
-                    {/* Land Class & Patta */}
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-800">{record.landClass}</div>
-                      <div className="text-[11px] text-slate-500">{record.pattaType}</div>
-                      {record.inTribalBelt && (
-                        <span className="inline-block mt-0.5 px-1.5 py-0.2 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">
-                          Tribal Belt
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Jamabandi Area */}
-                    <td className="py-3 px-4">
-                      <div className="font-mono font-medium text-slate-900">
-                        {formatBKL(record.jamabandiArea)}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {record.jamabandiAreaSqM.toFixed(1)} sq.m
-                      </div>
-                    </td>
-
-                    {/* GIS Cadastral Area */}
-                    <td className="py-3 px-4">
-                      <div className="font-mono font-medium text-slate-900">
-                        {formatBKL(record.cadastralAreaBKL)}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {record.cadastralAreaSqM.toFixed(1)} sq.m
-                      </div>
-                    </td>
-
-                    {/* Health Score */}
-                    <td className="py-3 px-4 text-center">
-                      <div className={`inline-flex flex-col items-center px-2.5 py-1 rounded-lg border font-bold ${
-                        isGradeA ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        isGradeD ? 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse' :
-                        isGradeC ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                        'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}>
-                        <span className="text-sm leading-tight">{report.score}/100</span>
-                        <span className="text-[10px] font-semibold">{report.grade.replace('_', ' ')}</span>
-                      </div>
-                    </td>
-
-                    {/* Detected Risk / Flags */}
-                    <td className="py-3 px-4 max-w-xs">
-                      {report.anomalies.length === 0 ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 font-medium text-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Zero Discrepancies
-                        </span>
-                      ) : (
-                        <div className="space-y-1">
-                          {report.anomalies.slice(0, 2).map((a) => (
-                            <div key={a.id} className="text-xs flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                a.severity === 'CRITICAL' ? 'bg-rose-600' :
-                                a.severity === 'HIGH' ? 'bg-amber-600' : 'bg-blue-600'
-                              }`} />
-                              <span className="font-medium text-slate-800 truncate" title={a.title}>
-                                {a.title}
-                              </span>
-                            </div>
-                          ))}
-                          {report.anomalies.length > 2 && (
-                            <span className="text-[11px] text-slate-500">
-                              +{report.anomalies.length - 2} more flag(s)
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => onSelectRecord(record)}
-                          className="p-1.5 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
-                          title="Inspect Technical Audit"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                        {isGradeD && (
-                          <button
-                            onClick={() => onDispatchToMandal(record)}
-                            className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[11px] font-semibold shadow-xs"
-                            title="Dispatch Lat Mandal"
-                          >
-                            Dispatch Field
-                          </button>
-                        )}
-                      </div>
-                    </td>
-
-                  </tr>
-                );
-              })}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
+      </div>
 
+      {/* Pilot Agricultural Parcels Table */}
+      <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h3 className="text-base font-semibold text-white flex items-center gap-2">
+              <Plane className="w-4 h-4 text-emerald-400" />
+              <span>Satellite &amp; Drone Ground-Truthing Field Parcels</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Live Dag-level remote sensing predictions with Sentinel-2 NDVI, Sentinel-1 SAR, and CCE validation
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Search */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search Dag, Farmer, Village..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-48 sm:w-60"
+              />
+            </div>
+
+            {/* Crop Filter */}
+            <div className="flex items-center space-x-1.5 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={filterCrop}
+                onChange={(e) => setFilterCrop(e.target.value)}
+                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="ALL">All Crops</option>
+                <option value="SALI_PADDY">Sali Paddy</option>
+                <option value="BORO_PADDY">Boro Paddy</option>
+                <option value="MUSTARD">Mustard</option>
+                <option value="JUTE">Jute</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-900/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700">
+              <tr>
+                <th className="px-4 py-3">Dag &amp; Patta</th>
+                <th className="px-4 py-3">Farmer &amp; Location</th>
+                <th className="px-4 py-3">Crop &amp; Variety</th>
+                <th className="px-4 py-3">Assam BKL Area</th>
+                <th className="px-4 py-3">NDVI / SAR dB</th>
+                <th className="px-4 py-3">Est. Yield (kg/ha)</th>
+                <th className="px-4 py-3">Yield Grade</th>
+                <th className="px-4 py-3">CCE Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-700/60">
+              {filteredParcels.map((parcel) => (
+                <tr key={parcel.id} className="hover:bg-slate-700/40 transition-colors">
+                  <td className="px-4 py-3.5">
+                    <div className="font-semibold text-white">Dag #{parcel.dagNumber}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Patta: {parcel.pattaNumber}</div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="font-medium text-slate-200">{parcel.farmerName}</div>
+                    <div className="text-[10px] text-slate-400">{parcel.village}, {parcel.circle}</div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="font-medium text-emerald-300">
+                      {parcel.cropType.replace('_', ' ')}
+                    </span>
+                    <span className="block text-[10px] text-slate-400">{parcel.cropVariety}</span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="font-mono">{parcel.areaBigha}B - {parcel.areaKatha}K - {parcel.areaLesa}L</span>
+                    <span className="block text-[10px] text-slate-500 font-mono">({parcel.areaHectares} Ha)</span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="font-mono text-cyan-300">NDVI: {parcel.spectralIndices.ndvi}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">SAR: {parcel.spectralIndices.sarBackscatterVvDb} dB</div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="font-bold text-white font-mono">{parcel.estimatedYieldKgHa} kg/ha</div>
+                    <div className="text-[10px] text-slate-400 font-mono">{parcel.estimatedYieldQuintalBigha} Q/Bigha</div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {parcel.yieldGrade === 'EXCELLENT' && (
+                      <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded text-[10px] font-semibold">
+                        Excellent
+                      </span>
+                    )}
+                    {parcel.yieldGrade === 'NORMAL' && (
+                      <span className="bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded text-[10px] font-semibold">
+                        Normal
+                      </span>
+                    )}
+                    {parcel.yieldGrade === 'BELOW_AVERAGE' && (
+                      <span className="bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded text-[10px] font-semibold">
+                        Below Avg
+                      </span>
+                    )}
+                    {parcel.yieldGrade === 'STRESSED_CRITICAL' && (
+                      <span className="bg-red-950 text-red-300 border border-red-800 px-2 py-0.5 rounded text-[10px] font-semibold animate-pulse">
+                        Inundated / Stressed
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
+                      parcel.cceStatus === 'COMPLETED'
+                        ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-700'
+                        : parcel.cceStatus === 'SCHEDULED'
+                        ? 'bg-amber-900/60 text-amber-300 border border-amber-700'
+                        : 'bg-slate-800 text-slate-400 border border-slate-700'
+                    }`}>
+                      {parcel.cceStatus}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <button
+                      onClick={() => onSelectParcel(parcel)}
+                      className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded border border-slate-600 transition-colors font-medium"
+                    >
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

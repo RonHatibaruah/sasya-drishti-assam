@@ -1,66 +1,93 @@
-# BhumiSwasthya (ভূমি স্বাস্থ্য)
-### Automated Land Records Health-Check & Cadastral Anomaly Detection System
+# SasyaDrishti (শস্য দৃষ্টি)
+### AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data
 
-[![Live Demo](https://img.shields.io/badge/Live_Prototype-bhumi--swasthya.pages.dev-10b981?style=for-the-badge&logo=cloudflarepages)](https://bhumi-swasthya.pages.dev/)
-[![Government of Assam](https://img.shields.io/badge/Government_of_Assam-Revenue_%26_Disaster_Management-064e3b?style=for-the-badge)](https://landrecords.assam.gov.in/)
-[![Challenge ID](https://img.shields.io/badge/NESFIC_2026-Stream_1_--_NESFIC--D--50-0284c7?style=for-the-badge)](https://startup.assam.gov.in/)
-[![Cloudflare Ready](https://img.shields.io/badge/Deployed_on-Cloudflare_Pages-f38020?style=for-the-badge&logo=cloudflare)](https://bhumi-swasthya.pages.dev/)
+[![NESFIC 2026](https://img.shields.io/badge/NESFIC_2026-Govt_Track_--_NESFIC--D--12-0284c7?style=for-the-badge)](https://startup.assam.gov.in/nesfic26/problem-statements/nesfic-d-12)
+[![Government of Assam](https://img.shields.io/badge/Government_of_Assam-Dept_of_Science_%26_Technology-064e3b?style=for-the-badge)](https://assac.assam.gov.in/)
+[![Sponsoring Body](https://img.shields.io/badge/Nodal_Agency-ASSAC_Assam_State_Space_Application_Centre-0d9488?style=for-the-badge)](https://assac.assam.gov.in/)
+[![Live Demo](https://img.shields.io/badge/Live_Prototype-sasya--drishti.pages.dev-10b981?style=for-the-badge&logo=cloudflarepages)](https://sasya-drishti.pages.dev/)
 [![React 18](https://img.shields.io/badge/Frontend-React_18_%7C_TypeScript_%7C_Tailwind-61dafb?style=for-the-badge&logo=react)](https://react.dev/)
-[![Leaflet GIS](https://img.shields.io/badge/Geospatial-Leaflet_%7C_PostGIS-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com/)
+[![Leaflet GIS](https://img.shields.io/badge/Geospatial-Leaflet_1.9_%7C_Sentinel_1%2F2-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com/)
 
-> 🌐 **Live Interactive Prototype:** **[https://bhumi-swasthya.pages.dev/](https://bhumi-swasthya.pages.dev/)**  
-> Explore executive analytics, live cadastral map inspector with polygon overlays, Lat Mandal field verification queue, citizen land health certificate generator, and the **Super Admin Command Console (`#admin`)**.
+> 🌐 **Official Interactive Prototype:** **[https://sasya-drishti.pages.dev/](https://sasya-drishti.pages.dev/)**  
+> Problem Statement Reference: **[NESFIC-D-12 (Assam Startup Portal)](https://startup.assam.gov.in/nesfic26/problem-statements/nesfic-d-12)**  
+> Explore the multi-district yield leaderboard, Sentinel-1/2 satellite & drone WebGIS viewer, mobile CCE ground-truthing portal, farmer digital harvest certificate generator, and the **Super Admin Operations Command Console (`#admin-console`)**.
 
 ---
 
 ## 🏛️ Executive Summary
 
-**BhumiSwasthya** is a proactive, automated land health-check and cadastral anomaly detection platform developed for the **Revenue & Disaster Management Department, Government of Assam** under **NESFIC-D-50 (Stream 1)**.
+**SasyaDrishti (শস্য দৃষ্টি)** is an end-to-end, multi-source agricultural remote sensing and crop yield prediction platform developed for the **Assam State Space Application Centre (ASSAC), Department of Science & Technology, Government of Assam** in partnership with the **Directorate of Agriculture, Assam** under **NESFIC-D-12**.
 
-Traditional land administration is **reactive**: errors in textual Jamabandi records and cadastral maps remain unnoticed until a citizen applies for a Land Sale NOC, Bank Mortgage, or Inheritance Mutation, resulting in sudden transaction freezes, protracted litigation, and citizen distress.
+### The Core Problem in Assam
+Estimating crop acreage, vigour, and production across Assam has historically faced four critical bottlenecks:
+1. **Persistent Monsoon Cloud Cover:** Optical satellites (Sentinel-2, Landsat) suffer from 70%–85% cloud obscuration during the critical Kharif Sali paddy vegetative and reproductive stages (June to October).
+2. **Smallholder Land Fragmentation:** Over 85% of Assam's farmers are smallholders with average plot sizes under 0.5 hectare (3–4 Bighas), creating mixed-pixel spectral noise in coarse satellite data.
+3. **Severe Flood Inundation:** Annual Brahmaputra and Barak river floods cause localized crop submergence, complicating damage assessments and post-flood salvage yield predictions.
+4. **Manual CCE Latency:** Traditional manual Crop Cutting Experiments (CCE) take 3–4 months to compile, delaying Food Corporation of India (FCI) / AFCSCL Minimum Support Price (MSP) procurement logistics and Pradhan Mantri Fasal Bima Yojana (PMFBY) insurance claim settlements.
 
-**BhumiSwasthya inverts this paradigm** into continuous, proactive assurance:
-1. **Automated Continuous Audit:** Continuously scans textual **Dharitree** Record of Rights (RoRs) against **Bhudakshya** cadastral GIS boundary vectors while records are at rest.
-2. **7 Statutory Consistency Dimensions:** Flags spatial overlaps, BKL area variances, unclosed boundaries, share deficits, zero-Touzi revenue dags, and Chapter X tribal belt violations.
-3. **Composite Land Health Score (LHS 0–100):** Triages parcels into 4 actionable risk tiers (Grade A Clean to Grade D Critical).
-4. **Targeted Lat Mandal PWA:** Auto-dispatches field survey work-orders with sub-meter RTK GNSS coordinate locking and offline SQLite synchronization.
-5. **Citizen Self-Check Portal:** Issues tamper-proof, verifiable digital Land Health Certificates with cryptographic SHA-256 QR tokens, enabling **pre-emptive 72-hour fast-track mutations** under **Mission Basundhara 3.0**.
-6. **Super Admin Command Console:** Real-time algorithmic calibration of statutory discrepancy tolerances, officer & Lat Mandal provisioning, dual-system ingestion telemetry, and immutable SHA-256 audit trails.
-
----
-
-## 📸 Technological Architecture & Visual Evidence
-
-### 1. Paradigm Shift: Reactive Bottleneck vs. Proactive Assurance
-![Paradigm Shift](assets/proposal_images/diagram_1_before_after_workflow.jpg)
-
-### 2. Dual-System Cross-Reconciliation (Dharitree & Bhudakshya)
-![Dual-System Reconciliation](assets/proposal_images/diagram_2_dual_system_reconciliation.jpg)
-
-### 3. 5-Vector Cadastral Anomaly Diagnostic Matrix
-![Cadastral Anomaly Catalog](assets/proposal_images/diagram_3_cadastral_anomaly_catalog.jpg)
-
-### 4. Composite Land Health Score (LHS) Architecture
-![LHS Architecture](assets/proposal_images/diagram_4_land_health_score_hierarchy.jpg)
-
-### 5. Lat Mandal Field Inspection PWA & Ground-Truthing
-![Lat Mandal PWA](assets/proposal_images/diagram_5_lat_mandal_mobile_app.jpg)
-
-### 6. Citizen Land Record Health Certificate & Portal
-![Citizen Health Certificate](assets/proposal_images/diagram_6_citizen_land_health_certificate.jpg)
-
-### 7. State Data Centre (ASDC) Enterprise Production Architecture
-![Enterprise System Architecture](assets/proposal_images/diagram_7_enterprise_system_architecture.jpg)
+### How SasyaDrishti Solves This
+SasyaDrishti establishes an automated **4-Tier Data Fusion Architecture**:
+- **Tier 1 (All-Weather Radar):** Sentinel-1 C-band Synthetic Aperture Radar (SAR) dual-polarization (VV/VH) radar backscatter penetrates heavy monsoon clouds, tracking standing biomass and floodwater submergence without interruption.
+- **Tier 2 (Multispectral Optical):** Sentinel-2 (10m) multi-temporal optical imagery computes Normalized Difference Vegetation Index (NDVI), Enhanced Vegetation Index (EVI), and Leaf Area Index (LAI) during cloud-free acquisition windows.
+- **Tier 3 (Centimeter UAV Drone Scans):** Sub-5cm multispectral and RGB drone flights over pilot agricultural clusters extract Canopy Height Models (CHM) and micro-level crop stress.
+- **Tier 4 (Field CCE Ground-Truthing):** Mobile digital logging of 5m × 5m quadrant harvest cuts with grain moisture correction dynamically calibrates AI model weights.
 
 ---
 
-## 💻 Tech Stack & Infrastructure
+## 💻 Recommended GitHub Repository Names
 
-- **Web Frontend:** React 18, TypeScript, Tailwind CSS, Lucide Icons, Vite
-- **WebGIS Engine:** Leaflet 1.9.4, GeoJSON/TopoJSON vector renderers, Dual-Mode Leaflet & SVG Cadastral Sheet Viewer
-- **Geospatial & Anomaly Core:** Python 3.13, PostGIS 3.4, Shapely, GEOS, Assam BKL Engine ($1\text{ Bigha} = 5\text{ Katha} = 100\text{ Lesa} \approx 1337.8\text{ m}^2$)
-- **Cloud & Edge Hosting:** Cloudflare Pages (SPA redirects, edge headers, asset optimization)
-- **State Data Centre Target:** Kubernetes, Kafka, Redis, PostgreSQL 16 + PostGIS, NIC e-Pramaan OAuth2
+| Preference | Repository Name | Rationale & Positioning |
+| :--- | :--- | :--- |
+| **Option 1 (Recommended)** | `sasya-drishti` or `sasya-drishti-assam` | *শস্য দৃষ্টি: AI-Powered Satellite, UAV & Field Data Crop Yield Estimation for Assam (NESFIC-D-12)*. Culturally authentic, memorable, and aligned with official Assam platforms like Dharitree & Bhudakshya. |
+| **Option 2** | `crop-yield-assam-nesfic-d12` | Directly incorporates the government problem statement ID and title for clear evaluation traceability. |
+| **Option 3** | `agri-sat-assam` | Emphasizes space applications and remote sensing pedigree under ASSAC / Dept of Science & Technology. |
+| **Option 4** | `kheti-lens-assam` | Highlights precision drone imaging and field-level inspection. |
+| **Option 5** | `assam-crop-sentinel` | Focuses on all-weather radar surveillance and food security. |
+
+---
+
+## 🎯 5 Core Operational Portals
+
+### 1. Executive Analytics & District Yield Dashboard (`#dashboard`)
+- **State-wide Telemetry:** Monitored acreage, estimated production in Lakh Metric Tonnes, and average yield in kg/ha and Quintals per Assam Bigha.
+- **Brahmaputra Flood Advisory:** Real-time SAR radar detection of waterlogged and submerged plots along riverine char areas (e.g. Baghbar Char, Barpeta).
+- **District Leaderboard:** Live ranking of Kamrup Metro, Nagaon, Barpeta, Golaghat, Darrang, and Cachar with exportable CSV summaries.
+
+### 2. Multi-Sensor Satellite & Drone WebGIS Viewer (`#satellite-gis`)
+- **Interactive Layer Switcher:**
+  - *Crop Yield Heatmap:* Parcel-level color coding (Emerald = Excellent >2.8 t/ha, Sky = Normal, Amber = Below Avg, Red = Inundated).
+  - *Sentinel-2 Optical NDVI:* Visualizes vegetation vigour and canopy greenness.
+  - *Sentinel-1 SAR Radar:* Cloud-penetrating C-band backscatter highlighting flood submergence ($\le -16.5\text{ dB}$).
+  - *UAV Drone Orthomosaic:* Centimeter-level pilot drone imagery.
+- **Parcel Inspector:** Displays Cadastral Dag/Patta, Pattadar name, Assam BKL area, NDVI, SAR dB, and predicted harvest yield.
+
+### 3. Drone Operations & Field CCE Ground-Truthing Portal (`#drone-cce`)
+- **Digital Crop Cutting Experiment (CCE) Logging:** Form for Agricultural Development Officers (ADOs) and Krishi Sahayaks to enter 5m × 5m quadrant fresh weights, dry weights, and grain moisture % with automated yield calibration:
+  $$\text{Yield (kg/ha)} = \frac{\text{Dry Grain Weight (kg)}}{25} \times 10,000 \times \frac{100 - \text{Moisture \%}}{100 - 14}$$
+- **UAV Flight Dispatcher:** Schedule drone flights, select sensor payloads (MicaSense 5-Band Multispectral vs. 4K RGB), and monitor battery telemetry.
+
+### 4. Farmer Advisory & Digital Yield Certificate Portal (`#farmer-portal`)
+- **Farmer Self-Service:** Search by Dag Number, Patta Number, or PM-KISAN / Farmer ID.
+- **Official Digital Certificate:** Issues an authentic, verifiable certificate with cryptographic SHA-256 verification token, MSP procurement quota for FCI / AFCSCL, PMFBY crop insurance benchmark assessment, and printable PDF format.
+
+### 5. Super Admin Command Console (`#admin-console`)
+- **AI/ML Model Hyperparameter Tuning:** Sliders to calibrate NDVI health thresholds, SAR floodwater dB cutoffs, and regression ensemble weights (XGBoost, Random Forest, Bi-LSTM, WOFOST biophysical assimilation).
+- **Sensor Ingestion Telemetry:** Live heartbeat monitoring for Copernicus Sentinel-1/2, ISRO Bhuvan/VEDAS, IMD weather feeds, and UAV tile processing.
+- **Role-Based Access Control (RBAC):** Provision credentials for ASSAC Remote Sensing Scientists, DAOs, ADOs, and Drone Pilots.
+- **MSP Targets & CCE Quotas:** Configure minimum statutory CCE sample density per revenue circle.
+- **Cryptographic Audit Ledger:** Immutable SHA-256 hashed audit trail of all model calibrations and yield overrides.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Frontend Application:** React 18, TypeScript, Tailwind CSS, Lucide Icons, Vite
+- **WebGIS Engine:** Leaflet 1.9.4, GeoJSON vector renderers, Esri World Imagery satellite basemaps
+- **Geospatial & Conversion Units:** Assam Statutory Land Unit Engine ($1\text{ Bigha} = 5\text{ Katha} = 100\text{ Lesa} \approx 1337.8\text{ m}^2 = 0.13378\text{ Ha}$)
+- **Machine Learning Architecture:**
+  - Hybrid Regressor: XGBoost (40%) + Random Forest (30%) + 1D-CNN / Bi-LSTM Time-Series (20%)
+  - Biophysical Growth: WOFOST / DSSAT temperature and radiation assimilation (10%)
+- **Edge Deployment:** Cloudflare Pages with zero-cold-start performance, SPA hash-based deep linking, and automated build pipelines
 
 ---
 
@@ -73,8 +100,8 @@ Traditional land administration is **reactive**: errors in textual Jamabandi rec
 ### Local Development
 ```bash
 # 1. Clone repository
-git clone https://github.com/RonHatibaruah/bhumi-swasthya.git
-cd bhumi-swasthya
+git clone https://github.com/RonHatibaruah/sasya-drishti.git
+cd sasya-drishti
 
 # 2. Install dependencies
 npm install
@@ -88,44 +115,22 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ```bash
 npm run build
 ```
-Production assets will be built to the `dist/` directory.
+Production assets will compile cleanly to the `dist/` directory.
 
 ---
 
-## ☁️ Cloudflare Pages Deployment
+## ☁️ Deployment
 
-This project is pre-configured for instant deployment on **Cloudflare Pages**:
+Pre-configured for instant deployment on **Cloudflare Pages**:
 - **Framework Preset:** Vite
 - **Build Command:** `npm run build`
 - **Build Output Directory:** `dist`
-- **Configuration Files:** `wrangler.toml`, `public/_redirects`, `public/_headers`
-
-See [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md) for step-by-step dashboard and CLI deployment instructions.
+- **Node.js Compatibility Flag:** `nodejs_compat`
 
 ---
 
-## 📄 Official Submission Documents & Text Versions
+## 📜 Authors & Acknowledgments
 
-- **Proposal Document (PDF):** [NESFIC_D50_Proposal_Ron_Hatibaruah.pdf](NESFIC_D50_Proposal_Ron_Hatibaruah.pdf) (12 Fields • 1.40 MB)
-- **Proof of Work & Solution Evidence Dossier (PDF):** [NESFIC_D50_Proof_of_Work_Ron_Hatibaruah.pdf](NESFIC_D50_Proof_of_Work_Ron_Hatibaruah.pdf) (7 Pages • 2.75 MB)
-- **Proposal Plain Text (Copy-Paste Ready):** [NESFIC_D50_Proposal_Ron_Hatibaruah.txt](NESFIC_D50_Proposal_Ron_Hatibaruah.txt) (Clean text formatted for online portal form textareas)
-- **Proof of Work Plain Text (Copy-Paste Ready):** [NESFIC_D50_Proof_of_Work_Ron_Hatibaruah.txt](NESFIC_D50_Proof_of_Work_Ron_Hatibaruah.txt) (Complete plain-text dossier with aligned ASCII tables)
-- **Proposal Markdown Contents:** [proposal_contents.md](proposal_contents.md)
-- **Proof of Work Markdown Dossier:** [proof_of_work_dossier.md](proof_of_work_dossier.md)
-
----
-
-## 👤 Applicant Attribution & Lead
-
-- **Lead Innovator & Solutions Architect:** **Ron Hatibaruah**
-- **Email / Inquiries:** [ron.hatibaruah@gmail.com](mailto:ron.hatibaruah@gmail.com)
-- **Challenge ID:** NESFIC-D-50 (Stream 1)
-- **Platform:** North East Startup Festival & Innovation Conclave (NESFIC 2026) / Assam Innovation & Startup Foundation (AISF)
-- **Challenge Owner:** Revenue & Disaster Management Department, Government of Assam
-
----
-
-## ⚖️ License & Disclaimers
-
-Copyright © 2026 Ron Hatibaruah. All rights reserved.  
-*BhumiSwasthya provides strictly non-invasive advisory health scores and diagnostic flags for government decision support. It does not perform automated mutation or alteration of legal land titles.*
+- **Lead Solutions Architect & Innovator:** Ron Hatibaruah
+- **Challenge:** North East Seva First Innovation Challenge (NESFIC 2026) — Problem Statement NESFIC-D-12
+- **Nodal Departments:** Assam State Space Application Centre (ASSAC), Department of Science & Technology, Government of Assam; Directorate of Agriculture, Assam.

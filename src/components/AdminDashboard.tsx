@@ -1,1434 +1,799 @@
 import React, { useState } from 'react';
-import {
-  Sliders,
-  Users,
-  RefreshCw,
-  Clock,
-  Shield,
-  CheckCircle2,
-  AlertTriangle,
-  Download,
-  UploadCloud,
-  FileText,
-  Activity,
-  Layers,
+import { 
+  Sliders, 
+  Database, 
+  Users, 
+  ShieldCheck, 
+  Clock, 
+  Activity, 
+  RefreshCw, 
+  Satellite, 
+  Plane, 
+  CheckCircle2, 
+  AlertTriangle, 
+  UserPlus, 
+  Download, 
+  Save, 
   Sparkles,
   Lock,
-  UserPlus,
-  ArrowRight,
-  Database,
   Search,
-  ExternalLink,
-  LogIn,
-  LogOut,
-  Eye,
-  EyeOff,
-  Mail,
-  Key
+  Layers,
+  TrendingUp,
+  Cpu
 } from 'lucide-react';
-import { LandRecord, VerificationTask } from '../types/landRecords';
-import { RuleEngineConfig, DEFAULT_RULE_CONFIG } from '../services/healthCheckEngine';
+import { ModelCalibrationConfig, CropParcelRecord, AuditLogEntry } from '../types/cropYield';
+import { DEFAULT_MODEL_CONFIG } from '../services/cropYieldEngine';
 
 interface AdminDashboardProps {
-  records: LandRecord[];
-  tasks: VerificationTask[];
-  ruleConfig: RuleEngineConfig;
-  onUpdateRuleConfig: (config: RuleEngineConfig) => void;
-  onReassignTask: (taskId: string, newMandal: string) => void;
-  onAddOfficer?: (officer: any) => void;
-  onIngestSampleParcels?: (newRecords: LandRecord[]) => void;
+  parcels: CropParcelRecord[];
+  modelConfig: ModelCalibrationConfig;
+  onUpdateModelConfig: (newConfig: ModelCalibrationConfig) => void;
+  onRecalculateAllParcels: () => void;
 }
 
-type AdminSubTab = 'rules' | 'hierarchy' | 'ingestion' | 'sla' | 'audit';
+type AdminSubTab = 'models' | 'pipelines' | 'hierarchy' | 'procurement' | 'audit';
 
-interface AuditLogEntry {
+interface DepartmentOfficer {
   id: string;
-  timestamp: string;
-  actor: string;
-  action: string;
-  details: string;
-  hash: string;
+  name: string;
+  role: 'ASSAC_SCIENTIST' | 'DAO' | 'ADO' | 'DRONE_PILOT' | 'KRISHI_SAHAYAK';
+  district: string;
+  circle: string;
+  status: 'ACTIVE' | 'ON_FIELD' | 'OFFLINE';
+  lastActive: string;
 }
+
+const INITIAL_OFFICERS: DepartmentOfficer[] = [
+  {
+    id: 'OFF-01',
+    name: 'Dr. P. K. Goswami',
+    role: 'ASSAC_SCIENTIST',
+    district: 'Statewide HQ',
+    circle: 'ASSAC Dispur',
+    status: 'ACTIVE',
+    lastActive: 'Just now'
+  },
+  {
+    id: 'OFF-02',
+    name: 'Bhaben Kalita',
+    role: 'DAO',
+    district: 'Kamrup Metro',
+    circle: 'Guwahati Circle',
+    status: 'ACTIVE',
+    lastActive: '12 mins ago'
+  },
+  {
+    id: 'OFF-03',
+    name: 'Dipankar Sarma',
+    role: 'ADO',
+    district: 'Kamrup Metro',
+    circle: 'Sonapur',
+    status: 'ON_FIELD',
+    lastActive: '45 mins ago'
+  },
+  {
+    id: 'OFF-04',
+    name: 'Anurag Sharma',
+    role: 'DRONE_PILOT',
+    district: 'Kamrup Metro',
+    circle: 'Sonapur Cluster',
+    status: 'ON_FIELD',
+    lastActive: '20 mins ago'
+  },
+  {
+    id: 'OFF-05',
+    name: 'Mukesh Talukdar',
+    role: 'ADO',
+    district: 'Barpeta',
+    circle: 'Baghbar',
+    status: 'ACTIVE',
+    lastActive: '1 hour ago'
+  }
+];
 
 const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
   {
     id: 'LOG-001',
-    timestamp: '2026-11-21 01:28:40',
-    actor: 'Director of Land Records (Super Admin)',
-    action: 'RULE_CALIBRATION',
-    details: 'Calibrated statutory area variance tolerance to ±5.0% under ALRR Rule 48.',
+    timestamp: '2026-11-22 11:42:10',
+    actor: 'Dr. P. K. Goswami (ASSAC Scientist)',
+    action: 'MODEL_CALIBRATION',
+    details: 'Calibrated Sentinel-1 SAR flood inundation threshold to -16.5 dB for Brahmaputra valley.',
     hash: '9f8e7d6c5b4a3f2e1d0c8b7a695847362514'
   },
   {
     id: 'LOG-002',
-    timestamp: '2026-11-21 01:15:10',
-    actor: 'System Ingestion Sentry',
-    action: 'DUAL_SYNC_HEARTBEAT',
-    details: 'Verified Dharitree RoR (PostgreSQL) and Bhudakshya Cadastral GIS (PostGIS) delta streams.',
+    timestamp: '2026-11-22 10:15:34',
+    actor: 'Copernicus Pipeline Sentry',
+    action: 'SENTINEL_SAR_SYNC',
+    details: 'Ingested C-band SAR Level-1 GRD pass over Kamrup & Nagaon agricultural basins.',
     hash: '7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f'
   },
   {
     id: 'LOG-003',
-    timestamp: '2026-11-20 23:54:19',
-    actor: 'CO Dispur HQ',
-    action: 'MANDAL_TASK_DISPATCH',
-    details: 'Dispatched field ground-truthing work-order TASK-2026-002 (Dag 104) to Lat Mandal Biren Kalita.',
+    timestamp: '2026-11-22 09:20:18',
+    actor: 'ADO Sonapur Dipankar Sarma',
+    action: 'CCE_GROUND_TRUTH_LOG',
+    details: 'Validated 5m x 5m quadrant harvest cut for Dag #104 (2890 kg/ha).',
     hash: '5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d'
   },
   {
     id: 'LOG-004',
-    timestamp: '2026-11-20 22:30:05',
-    actor: 'Citizen Self-Check Portal',
-    action: 'CERTIFICATE_GENERATED',
-    details: 'Issued digital Land Health Certificate for Dag 101 (Jatia, Dispur) with QR verification token.',
-    hash: '1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f'
+    timestamp: '2026-11-21 16:30:00',
+    actor: 'UAV Fleet Dispatcher',
+    action: 'DRONE_MISSION_DEPLOY',
+    details: 'Dispatched 5-band multispectral survey DRONE-AS-2026-01 over Khetri Gaon.',
+    hash: '3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b'
   }
 ];
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  records,
-  tasks,
-  ruleConfig,
-  onUpdateRuleConfig,
-  onReassignTask,
-  onAddOfficer,
-  onIngestSampleParcels
+  parcels,
+  modelConfig,
+  onUpdateModelConfig,
+  onRecalculateAllParcels
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<AdminSubTab>('rules');
-
-  // Sliders state initialized from props
-  const [areaTolerance, setAreaTolerance] = useState<number>(ruleConfig.areaTolerancePercent);
-  const [snappingTolerance, setSnappingTolerance] = useState<number>(ruleConfig.snappingToleranceMeters);
-  const [overlapWeight, setOverlapWeight] = useState<number>(ruleConfig.overlapPenalty);
-  const [varianceWeight, setVarianceWeight] = useState<number>(ruleConfig.varianceCriticalPenalty);
-  const [unclosedWeight, setUnclosedWeight] = useState<number>(20);
-  const [shareDeficitWeight, setShareDeficitWeight] = useState<number>(ruleConfig.shareDeficitPenalty);
-  const [zeroTouziWeight, setZeroTouziWeight] = useState<number>(ruleConfig.zeroRevenuePenalty);
-  const [tribalBeltActive, setTribalBeltActive] = useState<boolean>(ruleConfig.tribalBeltEnforcement);
-
-  const [notification, setNotification] = useState<string | null>(null);
-
-  // Ingestion batch simulation state
-  const [isAuditing, setIsAuditing] = useState<boolean>(false);
-  const [batchProgress, setBatchProgress] = useState<number>(0);
-  const [auditStats, setAuditStats] = useState<{ processed: number; anomalies: number } | null>(null);
-
-  // Audit logs state
+  const [activeTab, setActiveTab] = useState<AdminSubTab>('models');
+  const [localConfig, setLocalConfig] = useState<ModelCalibrationConfig>(modelConfig);
+  const [officers, setOfficers] = useState<DepartmentOfficer[]>(INITIAL_OFFICERS);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
+  const [statusMsg, setStatusMsg] = useState<string>('');
 
-  // Officer directory state
-  const [officers, setOfficers] = useState([
-    { id: 'LM-04', name: 'Biren Kalita', role: 'Lat Mandal (Field Surveyor)', circle: 'Dispur (Jatia, Beltola)', activeTasks: 3, status: 'Active In-Field', phone: '+91 94350 44521' },
-    { id: 'LM-09', name: 'Hemen Saikia', role: 'Lat Mandal (Field Surveyor)', circle: 'Sonapur (Tribal Belt)', activeTasks: 1, status: 'Active In-Field', phone: '+91 98640 12789' },
-    { id: 'LM-12', name: 'Dipankar Bora', role: 'Lat Mandal (Field Surveyor)', circle: 'Kaliabor (Kuwaritol)', activeTasks: 0, status: 'Standby / Available', phone: '+91 94351 99234' },
-    { id: 'CO-01', name: 'Dr. N. Goswami, ACS', role: 'Circle Officer (Dispur)', circle: 'Dispur Circle HQ', activeTasks: 7, status: 'HQ Online', phone: '+91 361 2237890' }
-  ]);
-
-  // Provisioning Modal/Form State
-  const [showProvisionModal, setShowProvisionModal] = useState<boolean>(false);
+  // Officer Provisioning Form
   const [newOfficerName, setNewOfficerName] = useState('');
-  const [newOfficerId, setNewOfficerId] = useState('');
-  const [newOfficerCircle, setNewOfficerCircle] = useState('Dispur');
-  const [newOfficerPhone, setNewOfficerPhone] = useState('');
+  const [newOfficerRole, setNewOfficerRole] = useState<DepartmentOfficer['role']>('ADO');
+  const [newOfficerDistrict, setNewOfficerDistrict] = useState('Nagaon');
+  const [newOfficerCircle, setNewOfficerCircle] = useState('Samaguri');
 
-  // Reassignment Modal State
-  const [selectedTaskToReassign, setSelectedTaskToReassign] = useState<VerificationTask | null>(null);
-  const [targetMandal, setTargetMandal] = useState('Dipankar Bora (LM-12)');
+  const handleSaveConfig = () => {
+    onUpdateModelConfig(localConfig);
+    onRecalculateAllParcels();
 
-  // Selected Rule 53 Dossier Record
-  const [rectificationRecord, setRectificationRecord] = useState<LandRecord | null>(null);
-
-  // Authentication State for Admin Console Access
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('bhumiswasthya_admin_auth') === 'true';
-  });
-  const [loginEmail, setLoginEmail] = useState('admin@assam.gov.in');
-  const [loginPassword, setLoginPassword] = useState('Bhumi@2026');
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Notification helper
-  const showToast = (msg: string) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 4000);
-  };
-
-  // Cryptographic Log Generator
-  const logAction = (action: string, details: string) => {
-    const randomHex = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    const newEntry: AuditLogEntry = {
+    const newLog: AuditLogEntry = {
       id: `LOG-${String(auditLogs.length + 1).padStart(3, '0')}`,
-      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      actor: 'Super Admin (ASDC Sentry)',
-      action,
-      details,
-      hash: randomHex
-    };
-    setAuditLogs(prev => [newEntry, ...prev]);
-  };
-
-  const handleLogin = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const cleanEmail = loginEmail.trim().toLowerCase();
-    const cleanPass = loginPassword.trim();
-
-    if (
-      (cleanEmail === 'admin@assam.gov.in' && cleanPass === 'Bhumi@2026') ||
-      (cleanEmail === 'admin' && cleanPass === 'admin')
-    ) {
-      sessionStorage.setItem('bhumiswasthya_admin_auth', 'true');
-      setIsAuthenticated(true);
-      setLoginError(null);
-      showToast('Welcome, Director of Land Records! Administrative session established.');
-      logAction('SUPER_ADMIN_LOGIN', 'Authenticated session established via ASDC e-Pramaan Single Sign-On.');
-    } else {
-      setLoginError('Invalid credentials. Please use the demo credentials provided below.');
-    }
-  };
-
-  const handleAutoFillAndLogin = () => {
-    setLoginEmail('admin@assam.gov.in');
-    setLoginPassword('Bhumi@2026');
-    sessionStorage.setItem('bhumiswasthya_admin_auth', 'true');
-    setIsAuthenticated(true);
-    setLoginError(null);
-    showToast('Welcome, Director of Land Records! Administrative session established.');
-    logAction('SUPER_ADMIN_LOGIN', 'Authenticated session established via 1-Click Demo Login.');
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('bhumiswasthya_admin_auth');
-    setIsAuthenticated(false);
-    setLoginEmail('admin@assam.gov.in');
-    setLoginPassword('Bhumi@2026');
-    showToast('Administrative session terminated.');
-  };
-
-  // Handle saving calibrated rules
-  const handleApplyRules = () => {
-    const updatedConfig: RuleEngineConfig = {
-      ...ruleConfig,
-      areaTolerancePercent: areaTolerance,
-      snappingToleranceMeters: snappingTolerance,
-      overlapPenalty: overlapWeight,
-      varianceCriticalPenalty: varianceWeight,
-      varianceMinorPenalty: Math.round(varianceWeight * 0.6),
-      shareDeficitPenalty: shareDeficitWeight,
-      zeroRevenuePenalty: zeroTouziWeight,
-      tribalBeltEnforcement: tribalBeltActive
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      actor: 'Super Admin (ASSAC Command)',
+      action: 'AI_MODEL_RECALIBRATION',
+      details: `Updated ML weights (XGB: ${localConfig.mlWeights.xgboost}, RF: ${localConfig.mlWeights.randomForest}, LSTM: ${localConfig.mlWeights.biLstm}) and re-scored all parcels.`,
+      hash: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     };
 
-    onUpdateRuleConfig(updatedConfig);
-    logAction('RULE_RECALIBRATION', `Updated tolerances: Area ±${areaTolerance}%, Snapping ${snappingTolerance}m, Overlap -${overlapWeight}pts.`);
-    showToast('Statewide statutory rule engine updated! All parcel health scores recalculated.');
+    setAuditLogs(prev => [newLog, ...prev]);
+    setStatusMsg('AI & Remote Sensing Model Parameters Saved & Re-calibrated across all parcels!');
+    setTimeout(() => setStatusMsg(''), 4000);
   };
 
-  // Reset rules to defaults
-  const handleResetDefaults = () => {
-    setAreaTolerance(DEFAULT_RULE_CONFIG.areaTolerancePercent);
-    setSnappingTolerance(DEFAULT_RULE_CONFIG.snappingToleranceMeters);
-    setOverlapWeight(DEFAULT_RULE_CONFIG.overlapPenalty);
-    setVarianceWeight(DEFAULT_RULE_CONFIG.varianceCriticalPenalty);
-    setUnclosedWeight(20);
-    setShareDeficitWeight(DEFAULT_RULE_CONFIG.shareDeficitPenalty);
-    setZeroTouziWeight(DEFAULT_RULE_CONFIG.zeroRevenuePenalty);
-    setTribalBeltActive(DEFAULT_RULE_CONFIG.tribalBeltEnforcement);
-
-    onUpdateRuleConfig(DEFAULT_RULE_CONFIG);
-    logAction('RULE_RESET', 'Statutory rule engine parameters reset to Assam Land Records Manual defaults.');
-    showToast('Rule engine reset to statutory defaults.');
+  const handleResetConfig = () => {
+    setLocalConfig(DEFAULT_MODEL_CONFIG);
+    onUpdateModelConfig(DEFAULT_MODEL_CONFIG);
+    onRecalculateAllParcels();
+    setStatusMsg('Restored default ASSAC operational benchmark weights.');
+    setTimeout(() => setStatusMsg(''), 3000);
   };
 
-  // Handle Reassigning a Task
-  const handleConfirmReassign = () => {
-    if (!selectedTaskToReassign) return;
-    onReassignTask(selectedTaskToReassign.id, targetMandal);
-    logAction('TASK_REASSIGNMENT', `Task ${selectedTaskToReassign.id} (Dag ${selectedTaskToReassign.dagNumber}) reassigned to ${targetMandal}.`);
-    showToast(`Task ${selectedTaskToReassign.id} successfully reassigned to ${targetMandal}!`);
-    setSelectedTaskToReassign(null);
-  };
-
-  // Handle Provisioning New Officer
-  const handleCreateOfficer = (e: React.FormEvent) => {
+  const handleAddOfficer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newOfficerName || !newOfficerId) return;
+    if (!newOfficerName) return;
 
-    const newOff = {
-      id: newOfficerId,
+    const newOff: DepartmentOfficer = {
+      id: `OFF-0${officers.length + 1}`,
       name: newOfficerName,
-      role: 'Lat Mandal (Field Surveyor)',
+      role: newOfficerRole,
+      district: newOfficerDistrict,
       circle: newOfficerCircle,
-      activeTasks: 0,
-      status: 'Standby / Available',
-      phone: newOfficerPhone || '+91 94350 00000'
+      status: 'ACTIVE',
+      lastActive: 'Just registered'
     };
 
     setOfficers(prev => [...prev, newOff]);
-    logAction('OFFICER_PROVISIONED', `Provisioned new Lat Mandal ${newOfficerName} (${newOfficerId}) in ${newOfficerCircle}.`);
-    showToast(`Officer ${newOfficerName} successfully provisioned into Assam Land Records Directory!`);
-    setShowProvisionModal(false);
     setNewOfficerName('');
-    setNewOfficerId('');
-    setNewOfficerPhone('');
+    setStatusMsg(`Officer ${newOff.name} (${newOff.role}) provisioned successfully!`);
+    setTimeout(() => setStatusMsg(''), 3000);
   };
-
-  // Run Batch Audit Simulation
-  const handleRunBatchAudit = () => {
-    setIsAuditing(true);
-    setBatchProgress(8);
-    setAuditStats(null);
-
-    const interval = setInterval(() => {
-      setBatchProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsAuditing(false);
-          setAuditStats({ processed: 28450, anomalies: 342 });
-          logAction('BATCH_AUDIT_COMPLETED', 'Executed automated 7-point consistency scan across 28,450 Dags in Dispur Circle. 342 anomalies flagged.');
-          showToast('Dispur Circle batch audit completed! 342 anomalies flagged for Lat Mandal ground-truthing.');
-          return 100;
-        }
-        return prev + 16;
-      });
-    }, 280);
-  };
-
-  // Export Audit Trail as CSV
-  const handleExportCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + "Log ID,Timestamp,Actor,Action,Details,SHA-256 Hash\n"
-      + auditLogs.map(l => `"${l.id}","${l.timestamp}","${l.actor}","${l.action}","${l.details.replace(/"/g, '""')}","${l.hash}"`).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `bhumiswasthya_compliance_audit_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    logAction('AUDIT_LOG_EXPORT', 'Exported cryptographic compliance audit trail (.CSV) for State Data Centre archive.');
-    showToast('Audit trail exported successfully!');
-  };
-
-  // If not authenticated, display secure Government Login Gateway
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[72vh] flex items-center justify-center py-6 px-4">
-        <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden text-slate-200">
-          <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Header */}
-          <div className="text-center relative z-10 mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 text-white shadow-lg shadow-amber-950/50 mb-3">
-              <Shield className="w-7 h-7" />
-            </div>
-            <div className="flex items-center justify-center space-x-2 text-xs text-emerald-400 font-semibold mb-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Assam State Data Centre (ASDC) • Secure Gateway</span>
-            </div>
-            <h2 className="text-xl font-bold text-white tracking-tight">
-              BhumiSwasthya Admin Console
-            </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Directorate of Land Records & Surveys • Revenue & Disaster Management Department
-            </p>
-          </div>
-
-          {/* Demo Credentials Quick Callout */}
-          <div className="bg-gradient-to-br from-amber-950/40 to-slate-950/80 border border-amber-600/40 rounded-2xl p-4 mb-6 relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wide">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                Demo Credentials (NESFIC 2026)
-              </span>
-              <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
-                Evaluator Access
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono mb-3">
-              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-[10px] text-slate-400 font-sans">User ID / Email</div>
-                <div className="text-amber-200 font-semibold truncate select-all">admin@assam.gov.in</div>
-              </div>
-              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-[10px] text-slate-400 font-sans">Password</div>
-                <div className="text-amber-200 font-semibold truncate select-all">Bhumi@2026</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleAutoFillAndLogin}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-amber-950/50 transition-all cursor-pointer"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>⚡ 1-Click Auto-Fill Demo Credentials & Login</span>
-            </button>
-          </div>
-
-          {/* Manual Login Form */}
-          <form onSubmit={handleLogin} className="space-y-4 relative z-10 text-xs">
-            {loginError && (
-              <div className="bg-red-950/80 border border-red-800 text-red-300 p-3 rounded-xl flex items-center space-x-2 text-xs">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
-                <span>{loginError}</span>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Official Email / User ID</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type="text"
-                  required
-                  placeholder="admin@assam.gov.in"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-9 pr-3 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Password</label>
-              <div className="relative">
-                <Key className="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-9 pr-10 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
-              <span>Sign In with Credentials</span>
-            </button>
-          </form>
-
-          {/* Security Notice */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center text-[10px] text-slate-500 relative z-10 flex items-center justify-center gap-2">
-            <Lock className="w-3 h-3 text-slate-500" />
-            <span>Assam State Data Centre (ASDC) Tier-III Certified • 256-Bit SSL Encrypted</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       
-      {/* Toast Notification */}
-      {notification && (
-        <div className="bg-emerald-950/90 border border-emerald-600 text-emerald-200 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-semibold shadow-lg shadow-emerald-950/50 animate-fade-in">
-          <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{notification}</span>
+      {/* Admin Header */}
+      <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono">
+              ASSAC COMMAND CONSOLE
+            </span>
+            <span className="text-xs text-slate-400">Government of Assam</span>
           </div>
-          <button onClick={() => setNotification(null)} className="text-emerald-400 hover:text-white">✕</button>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2 mt-1">
+            <Sliders className="w-5 h-5 text-emerald-400" />
+            <span>Super Admin &amp; Remote Sensing Operations Command</span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Calibrate AI/ML crop models, monitor satellite telemetry streams, provision field extension officers, and inspect immutable audit logs
+          </p>
+        </div>
+
+        {/* Sub-tab Navigation */}
+        <div className="flex flex-wrap items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-700">
+          <button
+            onClick={() => setActiveTab('models')}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === 'models' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            <span>AI/ML Tuning</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pipelines')}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === 'pipelines' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span>Data Ingestion</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('hierarchy')}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === 'hierarchy' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Officers &amp; RBAC</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('procurement')}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === 'procurement' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>MSP Targets</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === 'audit' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Audit Trail</span>
+          </button>
+        </div>
+      </div>
+
+      {statusMsg && (
+        <div className="bg-emerald-950/80 border border-emerald-700 text-emerald-300 text-xs p-3.5 rounded-xl flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{statusMsg}</span>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-400">TELEMETRY_UPDATED</span>
         </div>
       )}
 
-      {/* Top Cockpit Header & Key Telemetry Cards */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-                <Lock className="w-3 h-3" /> State Level Super Admin Console
-              </span>
-              <span className="text-slate-500">•</span>
-              <span className="text-xs text-slate-400">Assam Land Records & Surveys Directorate</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-              BhumiSwasthya Administrative Command Center
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Statutory Rule Engine Tuning, Multi-Circle Mandals Oversight, Dual Data-Sync Telemetry & SLA Compliance
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <div className="bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-xl text-left hidden sm:block">
-              <div className="text-[10px] text-slate-400 font-sans">Active Session:</div>
-              <div className="text-xs font-mono text-emerald-400 font-semibold">admin@assam.gov.in</div>
-            </div>
-            <button
-              onClick={handleExportCSV}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
-              title="Download tamper-proof cryptographic audit log for CAG/CERT-In verification"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Export Audit</span>
-            </button>
-            <button
-              onClick={handleRunBatchAudit}
-              disabled={isAuditing}
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-amber-950/40 transition-all"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isAuditing ? 'animate-spin' : ''}`} />
-              <span>{isAuditing ? 'Scanning...' : 'Batch Scan'}</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="bg-slate-800 hover:bg-red-950/40 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-800/80 text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
-              title="End admin session and sign out"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 4 Quick Operational Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/80">
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
-            <div className="text-[11px] text-slate-400 font-medium">State Revenue Circles</div>
-            <div className="text-xl font-bold text-white font-mono mt-0.5">154 Circles</div>
-            <div className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Coverage
-            </div>
-          </div>
-
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
-            <div className="text-[11px] text-slate-400 font-medium">Audited Cadastral Parcels</div>
-            <div className="text-xl font-bold text-amber-400 font-mono mt-0.5">1,250,420</div>
-            <div className="text-[10px] text-slate-400 mt-1">Dharitree & Bhudakshya Sync</div>
-          </div>
-
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
-            <div className="text-[11px] text-slate-400 font-medium">Lat Mandal Field Force</div>
-            <div className="text-xl font-bold text-teal-400 font-mono mt-0.5">{officers.length} Officers</div>
-            <div className="text-[10px] text-teal-300 mt-1">Active on Ground PWA</div>
-          </div>
-
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
-            <div className="text-[11px] text-slate-400 font-medium">ARTPS 7-Day SLA Breaches</div>
-            <div className="text-xl font-bold text-red-400 font-mono mt-0.5">1 Overdue</div>
-            <div className="text-[10px] text-red-300 mt-1 flex items-center gap-1">
-              <AlertTriangle className="w-2.5 h-2.5" /> Reassignment Required
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Sub-Navigation Tabs */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-1.5 flex flex-wrap gap-1 shadow-md">
-        
-        <button
-          onClick={() => setActiveSubTab('rules')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-            activeSubTab === 'rules'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <Sliders className="w-4 h-4" />
-          <span>Statutory Rule Engine Tuning</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('hierarchy')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-            activeSubTab === 'hierarchy'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Revenue Hierarchy & Mandal Directory</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('ingestion')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-            activeSubTab === 'ingestion'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Data Ingestion & Sync Sentry</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('sla')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-            activeSubTab === 'sla'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>Work-Order SLA Oversight ({tasks.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('audit')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-            activeSubTab === 'audit'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>Cryptographic Audit Trail</span>
-        </button>
-
-      </div>
-
-      {/* =========================================================================
-          MODULE A: STATUTORY RULE ENGINE & SCORING CALIBRATION
-          ========================================================================= */}
-      {activeSubTab === 'rules' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+      {/* 1. AI/ML Model & Remote Sensing Calibration Tab */}
+      {activeTab === 'models' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Sliders className="w-5 h-5 text-amber-400" />
-                Assam Land Records Manual • Algorithmic Scoring Calibration
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Adjust statutory discrepancy thresholds and deductive penalty weights (w₁ to w₇) without deploying new code.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleResetDefaults}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
-                Reset Defaults
-              </button>
-              <button
-                onClick={handleApplyRules}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-md shadow-emerald-950/40 flex items-center gap-1.5 transition-all"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Apply & Recalculate State LHS</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Area Discrepancy Slider */}
-            <div className="bg-slate-950/70 p-5 rounded-xl border border-slate-800 space-y-3">
-              <div className="flex justify-between items-center">
-                <div>
-                  <label className="text-xs font-bold text-white">
-                    Area Variance Discrepancy Tolerance
-                  </label>
-                  <p className="text-[11px] text-slate-400">Jamabandi Text vs Bhudakshya Cadastral Vector Area</p>
-                </div>
-                <span className="text-sm font-mono font-bold text-amber-400 bg-amber-950/60 px-3 py-1 rounded-lg border border-amber-800/60">
-                  ±{areaTolerance.toFixed(1)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="15"
-                step="0.5"
-                value={areaTolerance}
-                onChange={(e) => setAreaTolerance(parseFloat(e.target.value))}
-                className="w-full accent-amber-500 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>1.0% (Strict Digital)</span>
-                <span>5.0% (Statutory Standard)</span>
-                <span>15.0% (Lenient Legacy)</span>
-              </div>
-            </div>
-
-            {/* GIS Snapping Slider */}
-            <div className="bg-slate-950/70 p-5 rounded-xl border border-slate-800 space-y-3">
-              <div className="flex justify-between items-center">
-                <div>
-                  <label className="text-xs font-bold text-white">
-                    Cadastral Node Snapping Tolerance
-                  </label>
-                  <p className="text-[11px] text-slate-400">Vertex Distance to Auto-Collapse Micro-Slivers</p>
-                </div>
-                <span className="text-sm font-mono font-bold text-teal-400 bg-teal-950/60 px-3 py-1 rounded-lg border border-teal-800/60">
-                  {snappingTolerance.toFixed(2)} m
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0.05"
-                max="0.80"
-                step="0.05"
-                value={snappingTolerance}
-                onChange={(e) => setSnappingTolerance(parseFloat(e.target.value))}
-                className="w-full accent-teal-500 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0.05 m (Centimeter Precision)</span>
-                <span>0.15 m (Survey Standard)</span>
-                <span>0.80 m (Coarse)</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Deductive Weights Matrix */}
-          <div className="bg-slate-950/50 p-5 rounded-xl border border-slate-800 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+          <div className="lg:col-span-2 bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm space-y-6">
+            <div className="border-b border-slate-700 pb-3 flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-amber-400" />
-                  Statutory Deductive Formula Parameter Matrix
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Assam Land Records Manual composite health score formulation
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-emerald-400" />
+                  <span>Hybrid Remote Sensing &amp; AI Ensemble Calibration</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Dynamically adjust spectral vegetation indices, SAR cloud-penetrating radar cutoffs, and regression weights
                 </p>
               </div>
-              <div className="bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-2 font-mono text-xs shadow-inner flex items-center gap-2 self-start sm:self-auto">
-                <span className="text-slate-400 font-sans font-medium text-[11px]">Formula:</span>
-                <span className="text-amber-300 font-bold tracking-wide">
-                  S = max(0, 100 − ∑<sub>i=1</sub><sup>7</sup> (w<sub>i</sub> × p<sub>i</sub>))
-                </span>
-              </div>
+              <button
+                onClick={handleResetConfig}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Reset Defaults</span>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="space-y-5 text-xs">
               
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-300 font-medium">w₁: Boundary Overlap</span>
-                  <span className="font-mono text-red-400 font-bold">-{overlapWeight} pts</span>
+              {/* NDVI Healthy Threshold Slider */}
+              <div className="space-y-1.5 bg-slate-900/60 p-3.5 rounded-lg border border-slate-700/60">
+                <div className="flex justify-between items-center">
+                  <label className="text-slate-200 font-semibold">
+                    Sentinel-2 NDVI Healthy Canopy Threshold:
+                  </label>
+                  <span className="font-mono text-emerald-400 font-bold bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                    {localConfig.ndviHealthyThreshold.toFixed(2)}
+                  </span>
                 </div>
                 <input
                   type="range"
-                  min="15"
-                  max="60"
-                  value={overlapWeight}
-                  onChange={(e) => setOverlapWeight(parseInt(e.target.value))}
-                  className="w-full accent-red-500 cursor-pointer"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Severe title conflict under Sec 40</p>
-              </div>
-
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-300 font-medium">w₂: Area Variance (&gt;15%)</span>
-                  <span className="font-mono text-amber-400 font-bold">-{varianceWeight} pts</span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="50"
-                  value={varianceWeight}
-                  onChange={(e) => setVarianceWeight(parseInt(e.target.value))}
-                  className="w-full accent-amber-500 cursor-pointer"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Significant BKL discrepancy</p>
-              </div>
-
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-300 font-medium">w₃: Unclosed Boundary</span>
-                  <span className="font-mono text-blue-400 font-bold">-{unclosedWeight} pts</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="35"
-                  value={unclosedWeight}
-                  onChange={(e) => setUnclosedWeight(parseInt(e.target.value))}
-                  className="w-full accent-blue-500 cursor-pointer"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Non-topological polygon ring</p>
-              </div>
-
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-300 font-medium">w₄: Co-Sharer Deficit</span>
-                  <span className="font-mono text-purple-400 font-bold">-{shareDeficitWeight} pts</span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="40"
-                  value={shareDeficitWeight}
-                  onChange={(e) => setShareDeficitWeight(parseInt(e.target.value))}
-                  className="w-full accent-purple-500 cursor-pointer"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Shares sum &lt; 100% (Missing heirs)</p>
-              </div>
-
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-300 font-medium">w₅: Zero Touzi Default</span>
-                  <span className="font-mono text-emerald-400 font-bold">-{zeroTouziWeight} pts</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="25"
-                  value={zeroTouziWeight}
-                  onChange={(e) => setZeroTouziWeight(parseInt(e.target.value))}
+                  min="0.50"
+                  max="0.85"
+                  step="0.01"
+                  value={localConfig.ndviHealthyThreshold}
+                  onChange={(e) => setLocalConfig(prev => ({ ...prev, ndviHealthyThreshold: parseFloat(e.target.value) }))}
                   className="w-full accent-emerald-500 cursor-pointer"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">₹0.00 assessment on private patta</p>
+                <span className="text-[10px] text-slate-400 block">
+                  Plots with NDVI above this threshold are classified into the Excellent Yield tier.
+                </span>
               </div>
 
-              {/* Tribal Belt Sentry Switch */}
-              <div className="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold text-white">Chapter X Tribal Sentry</div>
-                  <div className="text-[10px] text-slate-400">Strict check in Sonapur/Dimoria</div>
+              {/* Sentinel-1 SAR Flood Inundation Cutoff */}
+              <div className="space-y-1.5 bg-slate-900/60 p-3.5 rounded-lg border border-slate-700/60">
+                <div className="flex justify-between items-center">
+                  <label className="text-slate-200 font-semibold">
+                    Sentinel-1 SAR Flood Inundation Cutoff (dB):
+                  </label>
+                  <span className="font-mono text-cyan-300 font-bold bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                    {localConfig.sarFloodInundationDb.toFixed(1)} dB
+                  </span>
                 </div>
+                <input
+                  type="range"
+                  min="-22.0"
+                  max="-13.0"
+                  step="0.5"
+                  value={localConfig.sarFloodInundationDb}
+                  onChange={(e) => setLocalConfig(prev => ({ ...prev, sarFloodInundationDb: parseFloat(e.target.value) }))}
+                  className="w-full accent-cyan-500 cursor-pointer"
+                />
+                <span className="text-[10px] text-slate-400 block">
+                  C-band SAR radar backscatter &le; this value indicates standing floodwater or submerged crops along the Brahmaputra.
+                </span>
+              </div>
+
+              {/* AI Machine Learning Ensemble Weights */}
+              <div className="space-y-3 bg-slate-900/60 p-3.5 rounded-lg border border-slate-700/60">
+                <span className="text-slate-200 font-semibold block mb-1">
+                  Ensemble Algorithm Weight Distribution:
+                </span>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">XGBoost Regressor:</span>
+                      <span className="font-mono text-emerald-400">{localConfig.mlWeights.xgboost.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="0.6"
+                      step="0.05"
+                      value={localConfig.mlWeights.xgboost}
+                      onChange={(e) => setLocalConfig(prev => ({
+                        ...prev,
+                        mlWeights: { ...prev.mlWeights, xgboost: parseFloat(e.target.value) }
+                      }))}
+                      className="w-full accent-emerald-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">Random Forest:</span>
+                      <span className="font-mono text-emerald-400">{localConfig.mlWeights.randomForest.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="0.6"
+                      step="0.05"
+                      value={localConfig.mlWeights.randomForest}
+                      onChange={(e) => setLocalConfig(prev => ({
+                        ...prev,
+                        mlWeights: { ...prev.mlWeights, randomForest: parseFloat(e.target.value) }
+                      }))}
+                      className="w-full accent-emerald-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">Bi-LSTM Time-Series:</span>
+                      <span className="font-mono text-cyan-300">{localConfig.mlWeights.biLstm.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="0.5"
+                      step="0.05"
+                      value={localConfig.mlWeights.biLstm}
+                      onChange={(e) => setLocalConfig(prev => ({
+                        ...prev,
+                        mlWeights: { ...prev.mlWeights, biLstm: parseFloat(e.target.value) }
+                      }))}
+                      className="w-full accent-cyan-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">WOFOST Biophysical:</span>
+                      <span className="font-mono text-purple-300">{localConfig.mlWeights.wofostAssimilation.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="0.3"
+                      step="0.05"
+                      value={localConfig.mlWeights.wofostAssimilation}
+                      onChange={(e) => setLocalConfig(prev => ({
+                        ...prev,
+                        mlWeights: { ...prev.mlWeights, wofostAssimilation: parseFloat(e.target.value) }
+                      }))}
+                      className="w-full accent-purple-500 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 pt-2">
                 <button
-                  type="button"
-                  onClick={() => setTribalBeltActive(!tribalBeltActive)}
-                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                    tribalBeltActive ? 'bg-amber-600' : 'bg-slate-700'
-                  }`}
+                  onClick={handleSaveConfig}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
                 >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                      tribalBeltActive ? 'translate-x-6' : 'translate-x-0'
-                    }`}
-                  />
+                  <Save className="w-4 h-4" />
+                  <span>Save Configuration &amp; Recalculate Yields</span>
                 </button>
               </div>
 
             </div>
           </div>
 
+          {/* Model Health & Summary Stats */}
+          <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-700 pb-3">
+              <Activity className="w-4 h-4 text-cyan-400" />
+              <span>Model Execution Telemetry</span>
+            </h3>
+
+            <div className="space-y-3 text-xs">
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-1">
+                <span className="text-slate-400 text-[10px] uppercase tracking-wider block">Total Monitored Parcels</span>
+                <span className="text-xl font-bold text-white font-mono">{parcels.length} Field Plots</span>
+                <span className="text-[10px] text-emerald-400 block">&bull; 100% Ingested in GIS Vector Database</span>
+              </div>
+
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-1">
+                <span className="text-slate-400 text-[10px] uppercase tracking-wider block">Mean Prediction Accuracy</span>
+                <span className="text-xl font-bold text-emerald-400 font-mono">92.8%</span>
+                <span className="text-[10px] text-slate-400 block">Validated vs CCE Ground Truth Cuts</span>
+              </div>
+
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-1">
+                <span className="text-slate-400 text-[10px] uppercase tracking-wider block">Inference Latency</span>
+                <span className="text-xl font-bold text-cyan-300 font-mono">18.4 ms / plot</span>
+                <span className="text-[10px] text-slate-400 block">Optimized on Edge Workers / Cloudflare</span>
+              </div>
+
+              <div className="p-3 bg-emerald-950/40 rounded-lg border border-emerald-800/60 text-[11px] text-emerald-300">
+                💡 <b>ASSAC Insight:</b> Integrating Sentinel-1 SAR C-band with Sentinel-2 increases cloud-season prediction accuracy from 64% to 92.8% during Assam's monsoon kharif cycle.
+              </div>
+            </div>
+          </div>
+
         </div>
       )}
 
-      {/* =========================================================================
-          MODULE B: REVENUE HIERARCHY & LAT MANDALS
-          ========================================================================= */}
-      {activeSubTab === 'hierarchy' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
-          
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-slate-800">
+      {/* 2. Data Ingestion Pipelines Tab */}
+      {activeTab === 'pipelines' && (
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm space-y-6">
+          <div className="border-b border-slate-700 pb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-400" />
-                Revenue Administrative Hierarchy & Personnel Directory
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400" />
+                <span>Multi-Source Satellite &amp; Drone Feed Ingestion Telemetry</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                District → Revenue Circle → Mouza → Lat Mandal Ground Surveyor Roster
+                Automated ingest connectors synchronizing ESA Copernicus, ISRO Bhuvan, IMD AWS, and UAV orthomosaics
               </p>
             </div>
             <button
-              onClick={() => setShowProvisionModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all"
+              onClick={() => {
+                setStatusMsg('Triggered remote sensing ingestion heartbeat for Copernicus Sentinel-1 & Sentinel-2!');
+                setTimeout(() => setStatusMsg(''), 3000);
+              }}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-600"
             >
-              <UserPlus className="w-4 h-4" />
-              <span>+ Provision New Officer</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Trigger Manual Sync</span>
             </button>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-800">
-                <tr>
-                  <th className="py-3 px-4">Officer ID & Name</th>
-                  <th className="py-3 px-4">Role Title</th>
-                  <th className="py-3 px-4">Jurisdiction Circle</th>
-                  <th className="py-3 px-4">Contact Phone</th>
-                  <th className="py-3 px-4">Workload</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {officers.map((off) => (
-                  <tr key={off.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-white">{off.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{off.id}</div>
-                    </td>
-                    <td className="py-3 px-4 text-slate-300 font-medium">{off.role}</td>
-                    <td className="py-3 px-4 text-slate-300">{off.circle}</td>
-                    <td className="py-3 px-4 font-mono text-slate-400">{off.phone}</td>
-                    <td className="py-3 px-4">
-                      <span className="font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60">
-                        {off.activeTasks} Dags
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                        off.status.includes('Active')
-                          ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                          : off.status.includes('HQ')
-                          ? 'bg-blue-950 text-blue-400 border-blue-800'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
-                      }`}>
-                        {off.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => showToast(`Workload rebalancer invoked for ${off.name}. Optimal queue calculated.`)}
-                        className="text-amber-400 hover:text-amber-300 font-semibold"
-                      >
-                        Rebalance
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            
+            <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white">Sentinel-2 MSI Optical</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <p className="text-slate-400 text-[11px]">Bands B04 (Red), B08 (NIR) &bull; 10m Ground Resolution</p>
+              <div className="text-[11px] text-slate-300 font-mono pt-1">
+                Last Ingest: <b>Today, 06:14 AM</b>
+              </div>
+              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 inline-block">
+                Status: ACTIVE (5-Day Revisit)
+              </span>
+            </div>
 
+            <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white">Sentinel-1 C-Band SAR</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              </div>
+              <p className="text-slate-400 text-[11px]">VV/VH Dual Polarization &bull; 20m All-Weather Radar</p>
+              <div className="text-[11px] text-slate-300 font-mono pt-1">
+                Last Ingest: <b>Today, 08:30 AM</b>
+              </div>
+              <span className="text-[10px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800 inline-block">
+                Status: ACTIVE (Cloud Penetrated)
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white">ISRO Bhuvan / VEDAS</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              </div>
+              <p className="text-slate-400 text-[11px]">Northeast Agro-Ecosystems &bull; Soil Moisture Grids</p>
+              <div className="text-[11px] text-slate-300 font-mono pt-1">
+                Last Ingest: <b>Yesterday, 18:00 PM</b>
+              </div>
+              <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 inline-block">
+                Status: HEALTHY
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white">UAV Drone Processing</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
+              </div>
+              <p className="text-slate-400 text-[11px]">Photogrammetry Orthomosaic &bull; 3.5 cm/px Resolution</p>
+              <div className="text-[11px] text-slate-300 font-mono pt-1">
+                Queue: <b>1 Job In-Progress</b>
+              </div>
+              <span className="text-[10px] bg-purple-950 text-purple-300 px-2 py-0.5 rounded border border-purple-800 inline-block">
+                Status: TILE PROCESSING
+              </span>
+            </div>
+
+          </div>
         </div>
       )}
 
-      {/* =========================================================================
-          MODULE C: DATA INGESTION & DUAL-SYSTEM SYNC SENTRY
-          ========================================================================= */}
-      {activeSubTab === 'ingestion' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+      {/* 3. Officers & RBAC Provisioning Tab */}
+      {activeTab === 'hierarchy' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div className="pb-4 border-b border-slate-800">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Database className="w-5 h-5 text-teal-400" />
-              State Data Centre (ASDC) Ingestion Telemetry & Connector Sentry
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Live heartbeat telemetry connecting Dharitree RoR and Bhudakshya Cadastral GIS clusters
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            
-            {/* Dharitree Connector */}
-            <div className="bg-slate-950/70 p-5 rounded-xl border border-slate-800 space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center space-x-2.5">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                  <div>
-                    <h4 className="font-bold text-white text-xs">Dharitree RoR Connector (Textual)</h4>
-                    <p className="text-[11px] text-slate-400">PostgreSQL 16 Cluster • Dispur State Data Centre</p>
-                  </div>
-                </div>
-                <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">
-                  ONLINE 100%
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 font-mono text-[11px]">
-                <div>
-                  <div className="text-slate-500 text-[10px]">Latency</div>
-                  <div className="text-emerald-400 font-bold">14 ms</div>
-                </div>
-                <div>
-                  <div className="text-slate-500 text-[10px]">Throughput</div>
-                  <div className="text-emerald-400 font-bold">4,200 rec/s</div>
-                </div>
-                <div>
-                  <div className="text-slate-500 text-[10px]">Sync Mode</div>
-                  <div className="text-emerald-400 font-bold">Live CDC</div>
-                </div>
-              </div>
+          {/* Add Officer Form */}
+          <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="border-b border-slate-700 pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-emerald-400" />
+                <span>Provision Extension Officer / Pilot</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Assign administrative jurisdiction under ASSAC and Directorate of Agriculture
+              </p>
             </div>
 
-            {/* Bhudakshya Connector */}
-            <div className="bg-slate-950/70 p-5 rounded-xl border border-slate-800 space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center space-x-2.5">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                  <div>
-                    <h4 className="font-bold text-white text-xs">Bhudakshya Cadastral GIS (Spatial)</h4>
-                    <p className="text-[11px] text-slate-400">GeoServer & PostGIS Spatial Engine • EPSG:3857</p>
-                  </div>
-                </div>
-                <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">
-                  ONLINE 100%
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 font-mono text-[11px]">
-                <div>
-                  <div className="text-slate-500 text-[10px]">Query Response</div>
-                  <div className="text-emerald-400 font-bold">22 ms</div>
-                </div>
-                <div>
-                  <div className="text-slate-500 text-[10px]">Vector Polygons</div>
-                  <div className="text-emerald-400 font-bold">1,250,420</div>
-                </div>
-                <div>
-                  <div className="text-slate-500 text-[10px]">WFS Topology</div>
-                  <div className="text-emerald-400 font-bold">Valid GEOS</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Batch Audit Simulation Runner */}
-          <div className="bg-slate-950/50 p-5 rounded-xl border border-slate-800 space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <form onSubmit={handleAddOfficer} className="space-y-3 text-xs">
               <div>
-                <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-amber-400" />
-                  Continuous Cadastral Batch Audit Engine (Scheduled Cron & On-Demand)
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Scans all village sheets and jamabandis at rest to uncover silent boundary overlaps and share deficits.
-                </p>
+                <label className="text-slate-300 font-medium block mb-1">Officer Name:</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Hemen Saikia"
+                  value={newOfficerName}
+                  onChange={(e) => setNewOfficerName(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  required
+                />
               </div>
-              <button
-                disabled={isAuditing}
-                onClick={handleRunBatchAudit}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 transition-all ${
-                  isAuditing
-                    ? 'bg-slate-700 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-md shadow-emerald-950/40'
-                }`}
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isAuditing ? 'animate-spin' : ''}`} />
-                <span>{isAuditing ? 'Auditing Parcels...' : 'Run Audit: Dispur Circle (30,000 Dags)'}</span>
-              </button>
-            </div>
 
-            {isAuditing && (
-              <div className="space-y-2 mt-3 bg-slate-900 p-4 rounded-xl border border-slate-800">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-slate-300">Executing 7-point consistency scan on Dispur Mouzas...</span>
-                  <span className="text-emerald-400 font-bold">{batchProgress}%</span>
+              <div>
+                <label className="text-slate-300 font-medium block mb-1">Designated Role:</label>
+                <select
+                  value={newOfficerRole}
+                  onChange={(e) => setNewOfficerRole(e.target.value as any)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="ASSAC_SCIENTIST">ASSAC Remote Sensing Scientist (Admin)</option>
+                  <option value="DAO">District Agriculture Officer (DAO)</option>
+                  <option value="ADO">Agriculture Development Officer (ADO - Circle)</option>
+                  <option value="DRONE_PILOT">UAV Drone Remote Pilot</option>
+                  <option value="KRISHI_SAHAYAK">VLEW / Krishi Sahayak (CCE Agent)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-300 font-medium block mb-1">District:</label>
+                  <select
+                    value={newOfficerDistrict}
+                    onChange={(e) => setNewOfficerDistrict(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="Kamrup Metro">Kamrup Metro</option>
+                    <option value="Nagaon">Nagaon</option>
+                    <option value="Barpeta">Barpeta</option>
+                    <option value="Golaghat">Golaghat</option>
+                    <option value="Darrang">Darrang</option>
+                  </select>
                 </div>
-                <div className="w-full bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-700">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-3 rounded-full transition-all duration-300"
-                    style={{ width: `${batchProgress}%` }}
+                <div>
+                  <label className="text-slate-300 font-medium block mb-1">Circle / Beat:</label>
+                  <input
+                    type="text"
+                    value={newOfficerCircle}
+                    onChange={(e) => setNewOfficerCircle(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                    required
                   />
                 </div>
               </div>
-            )}
 
-            {auditStats && (
-              <div className="bg-emerald-950/40 border border-emerald-800 p-4 rounded-xl flex items-center justify-between text-xs">
-                <div className="flex items-center space-x-3 text-emerald-300">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <span>
-                    Batch audit completed: <strong>{auditStats.processed.toLocaleString()}</strong> Dags reconciled with zero downtime.
-                  </span>
-                </div>
-                <div className="text-amber-400 font-mono font-bold">
-                  {auditStats.anomalies} anomalies queued for Mandal dispatch
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Interactive Cadastral File Ingestion Dropzone */}
-          <div
-            onClick={() => {
-              showToast('Cadastral sheet parser validated: Schema EPSG:3857 & Assam BKL syntax verified!');
-              logAction('FILE_INGESTION', 'Parsed test village cadastral sheet Jatia_Sheet_02.geojson (14 parcels).');
-            }}
-            className="border-2 border-dashed border-slate-700 hover:border-amber-500/60 rounded-2xl p-8 text-center bg-slate-950/30 cursor-pointer transition-all hover:bg-slate-950/50"
-          >
-            <UploadCloud className="w-10 h-10 text-amber-400 mx-auto mb-2" />
-            <h4 className="text-xs font-bold text-white">
-              Ingest Village Cadastral Sheet (GeoJSON / TopoJSON / Shapefile ZIP)
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-1 max-w-md mx-auto">
-              Drag and drop digitized cadastral sheets or click to upload. System automatically conducts topological checks, polygon closure, and Jamabandi reconciliation.
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-slate-700 font-semibold">
-              <span>Select GeoJSON / SHP Archive</span>
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODULE D: WORK-ORDER & SLA OVERSIGHT
-          ========================================================================= */}
-      {activeSubTab === 'sla' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
-          
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Clock className="w-5 h-5 text-amber-400" />
-                Field Survey Work-Order SLA Command & Escalation Monitor
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Statutory 7-Day Target under the Assam Right to Public Services Act (ARTPS)
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="bg-red-950 text-red-300 border border-red-800 text-xs px-2.5 py-1 rounded-lg font-mono font-bold">
-                1 Overdue SLA
-              </span>
-              <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs px-2.5 py-1 rounded-lg font-mono font-bold">
-                {tasks.length} Active Orders
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {tasks.map((task, idx) => {
-              const matchedRecord = records.find(r => r.id === task.dagId || r.dagNumber === task.dagNumber);
-              const isOverdue = idx === 0;
-
-              return (
-                <div
-                  key={task.id}
-                  className={`p-4 rounded-xl border transition-all ${
-                    isOverdue
-                      ? 'bg-red-950/20 border-red-800/80'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs text-slate-400 font-bold">{task.id}</span>
-                        <span className="text-white font-bold text-sm">
-                          Dag {task.dagNumber} • Patta {task.pattaNumber} ({task.village}, {task.circle})
-                        </span>
-                        {isOverdue && (
-                          <span className="bg-red-950 text-red-400 border border-red-800 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" /> SLA BREACH (9 Days)
-                          </span>
-                        )}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                          task.priority === 'CRITICAL'
-                            ? 'bg-red-950 text-red-400 border border-red-800'
-                            : 'bg-amber-950 text-amber-400 border border-amber-800'
-                        }`}>
-                          {task.priority}
-                        </span>
-                      </div>
-
-                      <div className="text-xs text-slate-300 mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                        <span>Assigned Officer: <strong className="text-amber-300">{task.assignedMandal}</strong></span>
-                        <span>Scheduled: <strong className="text-slate-200">{task.scheduledDate}</strong></span>
-                        <span>Status: <strong className="text-white">{task.status}</strong></span>
-                      </div>
-
-                      <div className="mt-2 text-[11px] text-slate-400">
-                        Anomalies to ground-truth: <span className="text-slate-300">{task.anomaliesSummary.join('; ')}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 shrink-0 self-end lg:self-center">
-                      {matchedRecord && (
-                        <button
-                          onClick={() => setRectificationRecord(matchedRecord)}
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Rule 53 Dossier</span>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => setSelectedTaskToReassign(task)}
-                        className="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm"
-                      >
-                        Reassign Mandal
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODULE E: CRYPTOGRAPHIC AUDIT LOGS
-          ========================================================================= */}
-      {activeSubTab === 'audit' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
-          
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                Immutable SHA-256 Audit Trail & CERT-In Compliance Logs
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Every administrative recalibration, task dispatch, and score evaluation is cryptographically sealed.
-              </p>
-            </div>
-            <button
-              onClick={handleExportCSV}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5"
-            >
-              <Download className="w-4 h-4 text-emerald-400" />
-              <span>Export CSV Dossier</span>
-            </button>
-          </div>
-
-          <div className="space-y-2.5 font-mono text-xs">
-            {auditLogs.map((log) => (
-              <div
-                key={log.id}
-                className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 hover:border-slate-700 transition-colors"
+              <button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
               >
-                <div>
-                  <div className="flex items-center space-x-2 text-xs">
-                    <span className="text-emerald-400 font-bold">{log.timestamp}</span>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-amber-400 font-bold">{log.action}</span>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400 text-[11px]">{log.actor}</span>
+                <UserPlus className="w-4 h-4" />
+                <span>Grant Credentials &amp; Provision</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Officers Table */}
+          <div className="lg:col-span-2 bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Users className="w-4 h-4 text-emerald-400" />
+                <span>Provisioned Department Roster ({officers.length})</span>
+              </h3>
+              <span className="text-xs font-mono text-emerald-400">e-Pramaan OAuth2 Linked</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="bg-slate-900/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700">
+                  <tr>
+                    <th className="px-3 py-2.5">Officer Name</th>
+                    <th className="px-3 py-2.5">Role</th>
+                    <th className="px-3 py-2.5">Jurisdiction</th>
+                    <th className="px-3 py-2.5">Status</th>
+                    <th className="px-3 py-2.5">Last Active</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/60">
+                  {officers.map(off => (
+                    <tr key={off.id} className="hover:bg-slate-700/40 transition-colors">
+                      <td className="px-3 py-3 font-medium text-white">
+                        {off.name}
+                        <span className="block text-[10px] text-slate-500 font-mono">{off.id}</span>
+                      </td>
+                      <td className="px-3 py-3 font-semibold text-emerald-400">
+                        {off.role.replace('_', ' ')}
+                      </td>
+                      <td className="px-3 py-3 text-slate-300">
+                        {off.circle}, {off.district}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
+                          off.status === 'ACTIVE' 
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' 
+                            : 'bg-blue-950 text-blue-300 border border-blue-800'
+                        }`}>
+                          {off.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-slate-400 font-mono text-[11px]">
+                        {off.lastActive}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* 4. MSP Targets & Quotas Tab */}
+      {activeTab === 'procurement' && (
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm space-y-6">
+          <div className="border-b border-slate-700 pb-3">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span>Assam MSP Procurement Forecast &amp; CCE Quotas</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Configuring Food Corporation of India (FCI) &amp; AFCSCL procurement targets and statutory CCE cuts
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            
+            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Paddy Minimum Support Price (MSP)
+              </span>
+              <div className="text-2xl font-black text-white font-mono">₹2,300 <span className="text-xs font-normal text-slate-400">/ Quintal</span></div>
+              <p className="text-slate-400 text-[11px]">Official MSP for Common Grade Kharif Paddy (2025-26)</p>
+            </div>
+
+            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Mustard / Rapeseed MSP
+              </span>
+              <div className="text-2xl font-black text-amber-400 font-mono">₹5,650 <span className="text-xs font-normal text-slate-400">/ Quintal</span></div>
+              <p className="text-slate-400 text-[11px]">Official MSP for Rabi Oilseed Crop</p>
+            </div>
+
+            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Statutory CCE Density SLA
+              </span>
+              <div className="text-2xl font-black text-cyan-300 font-mono">8 Cuts <span className="text-xs font-normal text-slate-400">/ Circle</span></div>
+              <p className="text-slate-400 text-[11px]">Mandatory for PMFBY Insurance Settlement Confidence</p>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 5. Immutable Cryptographic Audit Log Tab */}
+      {activeTab === 'audit' && (
+        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Cryptographic SHA-256 Audit Trail &amp; Compliance Ledger</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Tamper-evident record of all AI hyperparameter calibrations, manual yield overrides, and satellite ingest passes
+              </p>
+            </div>
+            <span className="text-xs font-mono bg-slate-900 text-slate-300 border border-slate-700 px-2.5 py-1 rounded">
+              Immutable Ledger: VERIFIED
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {auditLogs.map(log => (
+              <div key={log.id} className="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white font-mono">{log.id}</span>
+                    <span className="text-slate-500">&bull;</span>
+                    <span className="font-semibold text-emerald-400">{log.action}</span>
+                    <span className="text-slate-500">&bull;</span>
+                    <span className="text-slate-400 text-[11px]">{log.timestamp}</span>
                   </div>
-                  <div className="text-slate-200 mt-1 font-sans text-xs">{log.details}</div>
+                  <p className="text-slate-300">{log.details}</p>
+                  <p className="text-[10px] text-slate-500">Actor: <b className="text-slate-400">{log.actor}</b></p>
                 </div>
 
-                <div className="text-[10px] text-slate-500 bg-slate-900 px-2.5 py-1 rounded border border-slate-800 shrink-0 select-all">
-                  SHA-256: {log.hash.slice(0, 18)}...
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] text-slate-500 block font-mono">SHA-256 Digest:</span>
+                  <span className="text-[10px] text-cyan-400 font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800 select-all block mt-0.5">
+                    {log.hash.substring(0, 16)}...
+                  </span>
                 </div>
               </div>
             ))}
           </div>
 
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODAL 1: PROVISION NEW OFFICER
-          ========================================================================= */}
-      {showProvisionModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl text-slate-200">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 mb-1">
-              <UserPlus className="w-5 h-5 text-emerald-400" />
-              Provision New Revenue Officer / Lat Mandal
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Add authorized revenue staff to the Government of Assam operational roster.
-            </p>
-
-            <form onSubmit={handleCreateOfficer} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Officer Full Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Diganta Hazarika"
-                  value={newOfficerName}
-                  onChange={(e) => setNewOfficerName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Government Officer ID</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. LM-15"
-                  value={newOfficerId}
-                  onChange={(e) => setNewOfficerId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Assigned Revenue Circle</label>
-                <select
-                  value={newOfficerCircle}
-                  onChange={(e) => setNewOfficerCircle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500"
-                >
-                  <option value="Dispur">Dispur (Kamrup Metro)</option>
-                  <option value="Sonapur">Sonapur (Tribal Belt)</option>
-                  <option value="Kaliabor">Kaliabor (Nagaon)</option>
-                  <option value="Chandrapur">Chandrapur (Kamrup Metro)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Mobile Phone (e-Pramaan)</label>
-                <input
-                  type="text"
-                  placeholder="+91 94350 12345"
-                  value={newOfficerPhone}
-                  onChange={(e) => setNewOfficerPhone(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowProvisionModal(false)}
-                  className="px-4 py-2 rounded-lg text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
-                >
-                  Provision Officer
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODAL 2: REASSIGN MANDAL
-          ========================================================================= */}
-      {selectedTaskToReassign && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl text-slate-200">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 mb-1">
-              <Clock className="w-5 h-5 text-amber-400" />
-              Reassign Work-Order: {selectedTaskToReassign.id}
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Reallocate Dag {selectedTaskToReassign.dagNumber} to an available Lat Mandal to clear SLA bottleneck.
-            </p>
-
-            <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs space-y-1 mb-4">
-              <div>Current Mandal: <strong className="text-white">{selectedTaskToReassign.assignedMandal}</strong></div>
-              <div>Location: <strong className="text-white">{selectedTaskToReassign.village}, {selectedTaskToReassign.circle}</strong></div>
-              <div>Priority: <strong className="text-amber-400">{selectedTaskToReassign.priority}</strong></div>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <label className="block text-slate-300 font-semibold">Select New Lat Mandal</label>
-              <select
-                value={targetMandal}
-                onChange={(e) => setTargetMandal(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-amber-500"
-              >
-                <option value="Dipankar Bora (LM-12)">Dipankar Bora (LM-12) — 0 Active Tasks (Standby)</option>
-                <option value="Hemen Saikia (LM-09)">Hemen Saikia (LM-09) — 1 Active Task</option>
-                <option value="Biren Kalita (LM-04)">Biren Kalita (LM-04) — 3 Active Tasks</option>
-              </select>
-
-              <div className="flex justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTaskToReassign(null)}
-                  className="px-4 py-2 rounded-lg text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmReassign}
-                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold"
-                >
-                  Confirm Reassignment
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODAL 3: RULE 53 BOUNDARY RECTIFICATION DOSSIER
-          ========================================================================= */}
-      {rectificationRecord && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6 shadow-2xl text-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4 pb-3 border-b border-slate-800">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60">
-                  Statutory Revenue Notice
-                </span>
-                <h3 className="text-base font-bold text-white mt-1">
-                  Draft Rule 53 Boundary Correction Order (ALRR 1886)
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Court of the Circle Officer • Dispur Revenue Circle, Kamrup Metropolitan
-                </p>
-              </div>
-              <button
-                onClick={() => setRectificationRecord(null)}
-                className="text-slate-400 hover:text-white text-lg"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 text-xs font-mono">
-              <div className="text-center font-bold text-white uppercase border-b border-slate-800 pb-2">
-                OFFICE OF THE CIRCLE OFFICER :: DISPUR REVENUE CIRCLE
-              </div>
-
-              <div>
-                <span className="text-slate-500">Case No:</span> ALRR-R53-2026-{rectificationRecord.dagNumber}
-              </div>
-
-              <div>
-                <span className="text-slate-500">Subject:</span> Notice for Boundary Settlement & Demarcation Hearing under Rule 53 of Assam Land & Revenue Regulation, 1886.
-              </div>
-
-              <div className="text-slate-300 font-sans leading-relaxed">
-                WHEREAS, an automated cadastral consistency audit conducted by <strong>BhumiSwasthya</strong> has detected spatial boundary overlaps and/or area discrepancies on <strong>Dag No. {rectificationRecord.dagNumber}</strong>, Patta No. {rectificationRecord.pattaNumber}, Village {rectificationRecord.village}, Mouza {rectificationRecord.mouza};
-              </div>
-
-              <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1">
-                <div className="text-slate-400">Recorded Jamabandi Area: <strong className="text-white">{rectificationRecord.jamabandiAreaSqM} sq.m</strong></div>
-                <div className="text-slate-400">Digitized Bhudakshya Cadastral Area: <strong className="text-white">{rectificationRecord.cadastralAreaSqM} sq.m</strong></div>
-                {rectificationRecord.overlapsWithDag && (
-                  <div className="text-red-400 font-bold">Conflict: Intersecting geometry detected with Dag {rectificationRecord.overlapsWithDag}</div>
-                )}
-              </div>
-
-              <div className="text-slate-300 font-sans leading-relaxed">
-                Notice is hereby served upon pattadar(s) <strong>{rectificationRecord.pattadars.map(p => p.name).join(', ')}</strong> and contiguous landholders to appear before the undersigned at Dispur Revenue Circle HQ with original Jamabandi extract and boundary records.
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => {
-                  showToast('Rule 53 Notice copied to clipboard in government format.');
-                  setRectificationRecord(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
-              >
-                Copy Text
-              </button>
-              <button
-                onClick={() => {
-                  showToast('Rule 53 Notice dispatched to Circle Officer for signature.');
-                  setRectificationRecord(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
-              >
-                Issue Statutory Notice
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

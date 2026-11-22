@@ -1,329 +1,380 @@
 import React, { useState } from 'react';
 import { 
+  FileCheck2, 
   Search, 
-  ShieldCheck, 
+  Printer, 
+  Download, 
+  QrCode, 
   CheckCircle2, 
   AlertTriangle, 
-  AlertOctagon, 
-  FileText, 
-  Printer, 
-  Send, 
-  HelpCircle,
-  Building,
-  User,
-  Sparkles,
-  ArrowRight
+  ShieldCheck, 
+  Sprout, 
+  Satellite, 
+  Calendar,
+  Building2,
+  TrendingUp,
+  MapPin,
+  ExternalLink
 } from 'lucide-react';
-import { LandRecord } from '../types/landRecords';
-import { formatBKL } from '../services/healthCheckEngine';
+import { CropParcelRecord } from '../types/cropYield';
+import { generateCertificateToken } from '../services/cropYieldEngine';
 
 interface CitizenHealthPortalProps {
-  records: LandRecord[];
-  onSelectRecord: (record: LandRecord) => void;
+  parcels: CropParcelRecord[];
+  initialSelectedParcel?: CropParcelRecord | null;
 }
 
 export const CitizenHealthPortal: React.FC<CitizenHealthPortalProps> = ({
-  records,
-  onSelectRecord
+  parcels,
+  initialSelectedParcel
 }) => {
-  const [selectedVillage, setSelectedVillage] = useState<string>('Jatia');
-  const [queryDag, setQueryDag] = useState<string>('101');
-  const [searchedRecord, setSearchedRecord] = useState<LandRecord | null>(
-    records.find(r => r.dagNumber === '101') || records[0]
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeParcel, setActiveParcel] = useState<CropParcelRecord>(
+    initialSelectedParcel || parcels[0]
   );
-  const [correctionRequested, setCorrectionRequested] = useState<boolean>(false);
+  const [searched, setSearched] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCorrectionRequested(false);
-    const found = records.find(r => 
-      r.dagNumber.trim() === queryDag.trim() && 
-      (selectedVillage === 'ALL' || r.village.toLowerCase() === selectedVillage.toLowerCase())
+    setSearched(true);
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return;
+
+    const match = parcels.find(p => 
+      p.dagNumber.toLowerCase() === query || 
+      p.pattaNumber.toLowerCase() === query || 
+      p.farmerId.toLowerCase().includes(query) ||
+      p.farmerName.toLowerCase().includes(query) ||
+      p.village.toLowerCase().includes(query)
     );
-    setSearchedRecord(found || null);
+
+    if (match) {
+      setActiveParcel(match);
+    }
   };
 
-  const handlePresetSelect = (dagNum: string, village: string) => {
-    setQueryDag(dagNum);
-    setSelectedVillage(village);
-    setCorrectionRequested(false);
-    const found = records.find(r => r.dagNumber === dagNum);
-    setSearchedRecord(found || null);
-  };
+  const certificateToken = activeParcel ? generateCertificateToken(activeParcel) : '';
+  const mspRatePerQuintal = activeParcel.cropType === 'SALI_PADDY' || activeParcel.cropType === 'BORO_PADDY' 
+    ? 2300 // MSP for Paddy in 2025-26
+    : activeParcel.cropType === 'MUSTARD'
+    ? 5650 // MSP for Mustard
+    : 3800;
 
-  const printHealthCard = () => {
+  const totalProcurementValue = activeParcel 
+    ? Math.round((activeParcel.estimatedProductionTonnes * 10) * mspRatePerQuintal)
+    : 0;
+
+  const handlePrint = () => {
     window.print();
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       
-      {/* Citizen Welcome Banner */}
-      <div className="text-center space-y-2 py-4">
-        <div className="inline-flex items-center space-x-2 bg-amber-500/10 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span>Assam Citizen Land Health Self-Check • আপোনাৰ ভূমি স্বাস্থ্য পৰীক্ষা</span>
+      {/* Search Header */}
+      <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-6 shadow-sm">
+        <div className="text-center max-w-2xl mx-auto mb-5">
+          <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-full inline-block mb-2">
+            Farmer Self-Service &amp; MSP Advisory Portal
+          </span>
+          <h2 className="text-xl font-bold text-white">
+            Assam Digital Crop Health &amp; Estimated Yield Certificate
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Enter your Dag Number, Patta Number, or PM-KISAN ID to access real-time satellite remote sensing yield projections and official MSP procurement certification
+          </p>
         </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Check Your Land Record Before You Transact
-        </h2>
-        <p className="text-xs text-slate-600 max-w-xl mx-auto">
-          Scan your Dag and Patta records against official cadastral GIS maps and revenue rolls to catch errors and boundary discrepancies early, preventing delays during sale, mutation, or bank loans.
-        </p>
-      </div>
 
-      {/* Search Box */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Select Village / গাঁও
-            </label>
-            <select
-              value={selectedVillage}
-              onChange={(e) => setSelectedVillage(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="Jatia">Jatia (Dispur Circle)</option>
-              <option value="Khanapara">Khanapara (Dispur Circle)</option>
-              <option value="Sonapur Gaon">Sonapur Gaon (Sonapur Circle)</option>
-              <option value="Jakhalabandha">Jakhalabandha (Kaliabor Circle)</option>
-              <option value="ALL">All Villages</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Dag Number / দাগ নং
-            </label>
+        <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
-              value={queryDag}
-              onChange={(e) => setQueryDag(e.target.value)}
-              placeholder="e.g. 101, 102, 103, 205..."
-              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-amber-500"
+              placeholder="e.g. Dag 104, Patta KP-28, or Bipul Hazarika..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
           </div>
-
           <button
             type="submit"
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs shadow-md flex items-center justify-center space-x-2 transition-all"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
           >
-            <Search className="w-4 h-4 text-amber-400" />
-            <span>Generate Land Health Card</span>
+            <span>Search Plot</span>
           </button>
-
         </form>
 
-        {/* Quick Presets for Demo */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium">Quick Demo Scenarios:</span>
-          <button
-            type="button"
-            onClick={() => handlePresetSelect('101', 'Jatia')}
-            className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-semibold hover:bg-emerald-100"
-          >
-            ✓ Clean Record (Dag 101)
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePresetSelect('102', 'Jatia')}
-            className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[11px] font-semibold hover:bg-amber-100"
-          >
-            ⚠️ Area Shortfall (Dag 102)
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePresetSelect('103', 'Jatia')}
-            className="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-semibold hover:bg-rose-100"
-          >
-            ⚠️ Map Overlap (Dag 103)
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePresetSelect('205', 'Khanapara')}
-            className="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-[11px] font-semibold hover:bg-purple-100"
-          >
-            ⚠️ Share Deficit (Dag 205)
-          </button>
+        {/* Quick Sample Selector Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-[11px] text-slate-400">
+          <span>Try quick sample:</span>
+          {parcels.slice(0, 4).map(p => (
+            <button
+              key={p.id}
+              onClick={() => {
+                setActiveParcel(p);
+                setSearchQuery(p.dagNumber);
+              }}
+              className="bg-slate-900 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 font-mono transition-colors"
+            >
+              Dag #{p.dagNumber} ({p.circle} &bull; {p.cropType.replace('_', ' ')})
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Result Card */}
-      {searchedRecord ? (
-        <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">
+      {/* Official Verifiable Certificate Layout */}
+      {activeParcel && (
+        <div className="bg-slate-900 border-2 border-emerald-600/60 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden print:bg-white print:text-black print:border-black">
           
+          {/* Subtle Watermark Badge */}
+          <div className="absolute -right-12 -bottom-12 opacity-5 pointer-events-none text-emerald-500">
+            <Sprout className="w-96 h-96" />
+          </div>
+
           {/* Certificate Header */}
-          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6 border-b border-slate-700">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <span className="text-[10px] font-bold tracking-widest text-amber-400 uppercase">
-                  Government of Assam • Land Record Health Evaluation
+          <div className="border-b-2 border-emerald-500/40 pb-6 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+              <div className="flex items-center space-x-3">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-900/40 text-white shrink-0">
+                  <Sprout className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white tracking-wide uppercase">
+                    Government of Assam
+                  </h3>
+                  <p className="text-xs text-emerald-300 font-medium">
+                    Department of Science &amp; Technology &bull; Assam State Space Application Centre (ASSAC)
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    In collaboration with Directorate of Agriculture, Assam (NESFIC-D-12)
+                  </p>
+                </div>
+              </div>
+
+              {/* Cryptographic Verification Token */}
+              <div className="text-center sm:text-right bg-slate-800/80 border border-slate-700 px-3.5 py-2 rounded-xl">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
+                  Official Verification Token (SHA-256)
                 </span>
-                <h3 className="text-xl font-extrabold mt-1">
-                  Parcel Health Card: Dag No. {searchedRecord.dagNumber}
-                </h3>
-                <p className="text-xs text-slate-300">
-                  Village: {searchedRecord.village} • Circle: {searchedRecord.circle} • Patta: {searchedRecord.pattaNumber}
+                <span className="text-xs font-mono font-bold text-cyan-300 block select-all">
+                  {certificateToken}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-medium flex items-center justify-center sm:justify-end gap-1 mt-0.5">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Tamper-Proof &amp; Digitally Authenticated</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center mt-5">
+              <span className="bg-emerald-950 text-emerald-300 border border-emerald-700/80 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest inline-block shadow-xs">
+                Official Digital Crop Health &amp; Estimated Yield Certificate
+              </span>
+            </div>
+          </div>
+
+          {/* Certificate Body */}
+          <div className="space-y-6 text-xs">
+            
+            {/* Section 1: Farmer & Land Parcel Particulars */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-700/70">
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  1. Farmer &amp; Beneficiary Details
+                </h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Pattadar / Farmer Name:</span>
+                    <span className="font-bold text-white">{activeParcel.farmerName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">PM-KISAN / Farmer ID:</span>
+                    <span className="font-mono text-cyan-300">{activeParcel.farmerId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Contact Registered:</span>
+                    <span className="font-mono text-slate-300">{activeParcel.contactPhone}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  2. Cadastral Parcel Location
+                </h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Dag &amp; Patta Number:</span>
+                    <span className="font-mono font-bold text-white">Dag #{activeParcel.dagNumber} (Patta: {activeParcel.pattaNumber})</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Village &amp; Circle:</span>
+                    <span className="text-slate-200">{activeParcel.village}, {activeParcel.circle} ({activeParcel.district})</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Assam Land Holding:</span>
+                    <span className="font-mono font-semibold text-emerald-400">
+                      {activeParcel.areaBigha} Bigha - {activeParcel.areaKatha} Katha - {activeParcel.areaLesa} Lesa ({activeParcel.areaHectares} Ha)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Remote Sensing & Yield Estimation Telemetry */}
+            <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/70 space-y-3">
+              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                3. Remote Sensing Assessment &amp; Harvest Forecast
+              </h4>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-700">
+                  <span className="text-[10px] text-slate-400 block">Cultivated Crop</span>
+                  <span className="font-bold text-emerald-300 text-xs block mt-0.5">
+                    {activeParcel.cropType.replace('_', ' ')}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">Var: {activeParcel.cropVariety}</span>
+                </div>
+
+                <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-700">
+                  <span className="text-[10px] text-slate-400 block">Sentinel-2 NDVI</span>
+                  <span className="font-mono font-bold text-white text-base block mt-0.5">
+                    {activeParcel.spectralIndices.ndvi}
+                  </span>
+                  <span className="text-[10px] text-emerald-400">High Vigour</span>
+                </div>
+
+                <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-700">
+                  <span className="text-[10px] text-slate-400 block">Sentinel-1 SAR Radar</span>
+                  <span className="font-mono font-bold text-cyan-300 text-base block mt-0.5">
+                    {activeParcel.spectralIndices.sarBackscatterVvDb} dB
+                  </span>
+                  <span className="text-[10px] text-slate-400">All-Weather Validated</span>
+                </div>
+
+                <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-700">
+                  <span className="text-[10px] text-slate-400 block">Phenology Stage</span>
+                  <span className="font-mono font-bold text-amber-300 text-xs block mt-0.5">
+                    {activeParcel.stage}
+                  </span>
+                  <span className="text-[10px] text-slate-400">Harvest: {activeParcel.expectedHarvestDate}</span>
+                </div>
+              </div>
+
+              {/* Yield Forecast Highlight Box */}
+              <div className="bg-emerald-950/80 border border-emerald-600 rounded-xl p-4 text-center mt-3">
+                <span className="text-[11px] font-semibold text-emerald-300 uppercase tracking-widest block">
+                  Official Projected Harvest Yield
+                </span>
+                <div className="text-3xl font-black text-white font-mono mt-1">
+                  {activeParcel.estimatedYieldKgHa} <span className="text-sm font-normal text-slate-300">kg/hectare</span>
+                </div>
+                <div className="text-sm font-semibold text-emerald-400 font-mono mt-1">
+                  &asymp; {activeParcel.estimatedYieldQuintalBigha} Quintals per Assam Bigha &bull; Total Projected Harvest: {activeParcel.estimatedProductionTonnes} Metric Tonnes
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Validated against Directorate of Agriculture CCE Benchmarks with <b>{activeParcel.confidenceScore}%</b> AI Multi-Model Confidence.
                 </p>
               </div>
-
-              {/* Health Score Badge */}
-              <div className={`px-4 py-2.5 rounded-xl border text-center shadow-md ${
-                searchedRecord.healthReport.grade === 'GRADE_A' ? 'bg-emerald-950/80 text-emerald-400 border-emerald-600' :
-                searchedRecord.healthReport.grade === 'GRADE_D' ? 'bg-rose-950/80 text-rose-400 border-rose-600' :
-                'bg-amber-950/80 text-amber-400 border-amber-600'
-              }`}>
-                <div className="text-2xl font-black">{searchedRecord.healthReport.score}/100</div>
-                <div className="text-[10px] font-bold uppercase tracking-wider">
-                  {searchedRecord.healthReport.riskStatus.replace('_', ' ')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 space-y-6">
-            
-            {/* Status Recommendation Box */}
-            {searchedRecord.healthReport.grade === 'GRADE_A' ? (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                    Record Status: Fast-Track Ready (উত্তম স্বাস্থ্য)
-                  </h4>
-                  <p className="text-xs text-emerald-800 mt-0.5">
-                    Cadastral polygon geometry matches the recorded Jamabandi area with 0 boundary conflicts. All landholder shares are fully accounted for, and touzi revenue is up-to-date. Eligible for instant mutation upon transfer.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
-                <AlertOctagon className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wide">
-                    Action Required Before Mutation / Sale
-                  </h4>
-                  <p className="text-xs text-rose-800 mt-0.5">
-                    This parcel has {searchedRecord.healthReport.anomalies.length} detected inconsistency. Applying for registration or bank mortgage right now may result in service delays or title objections.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Core Details Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-              <div>
-                <span className="text-[10px] uppercase text-slate-500 font-bold block">Jamabandi Area</span>
-                <span className="font-bold text-slate-900 text-sm font-mono">
-                  {formatBKL(searchedRecord.jamabandiArea)}
-                </span>
-                <span className="text-[10px] text-slate-500 block">({searchedRecord.jamabandiAreaSqM.toFixed(1)} sq.m)</span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase text-slate-500 font-bold block">Bhudakshya GIS Area</span>
-                <span className="font-bold text-slate-900 text-sm font-mono">
-                  {formatBKL(searchedRecord.cadastralAreaBKL)}
-                </span>
-                <span className="text-[10px] text-slate-500 block">({searchedRecord.cadastralAreaSqM.toFixed(1)} sq.m)</span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase text-slate-500 font-bold block">Patta Type</span>
-                <span className="font-bold text-slate-900">{searchedRecord.pattaType}</span>
-                <span className="text-[10px] text-slate-500 block">{searchedRecord.landClass}</span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase text-slate-500 font-bold block">Annual Revenue</span>
-                <span className="font-bold text-slate-900">₹{searchedRecord.annualRevenueRs.toFixed(2)}</span>
-                <span className="text-[10px] text-slate-500 block">Touzi Assessed</span>
-              </div>
             </div>
 
-            {/* Detected Issues List */}
-            {searchedRecord.healthReport.anomalies.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Identified Inconsistencies & Recommended Corrections
+            {/* Section 3: MSP Procurement & PMFBY Crop Insurance Advisory */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-700/70">
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>MSP Procurement Allocation (FCI / AFCSCL)</span>
                 </h4>
-                <div className="space-y-2">
-                  {searchedRecord.healthReport.anomalies.map((a) => (
-                    <div key={a.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-900">{a.title}</span>
-                        <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                          {a.severity}
-                        </span>
-                      </div>
-                      <p className="text-slate-600 text-[11px]">{a.description}</p>
-                      <div className="text-slate-800 font-medium text-[11px] pt-1 border-t border-slate-200">
-                        💡 <strong>Citizen Guide:</strong> {a.suggestedAction}
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-1 text-slate-300">
+                  <div className="flex justify-between">
+                    <span>Government MSP Rate:</span>
+                    <span className="font-mono font-bold text-white">₹{mspRatePerQuintal} / Quintal</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Approved Procurement Quota:</span>
+                    <span className="font-mono font-bold text-emerald-400">
+                      {(activeParcel.estimatedProductionTonnes * 10).toFixed(1)} Quintals
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t border-slate-700 pt-1">
+                    <span>Estimated Gross Realization:</span>
+                    <span className="font-mono font-bold text-cyan-300">₹{totalProcurementValue.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Pattadar Ownership Summary */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                Recorded Landholders (Pattadars)
-              </h4>
-              <div className="space-y-2">
-                {searchedRecord.pattadars.map((p) => (
-                  <div key={p.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
-                    <div>
-                      <div className="font-bold text-slate-900">{p.name}</div>
-                      <div className="text-[11px] text-slate-500">{p.relation} {p.guardianName}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-slate-900">{p.sharePercentage}% Share</div>
-                      <div className="text-[11px] text-emerald-600 font-medium">Aadhaar {p.aadhaarStatus}</div>
-                    </div>
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>PMFBY Crop Insurance Pre-Assessment</span>
+                </h4>
+                <div className="space-y-1 text-slate-300">
+                  <div className="flex justify-between">
+                    <span>Flood Inundation Risk:</span>
+                    <span className={`font-semibold ${activeParcel.floodInundated ? 'text-red-400' : 'text-emerald-400'}`}>
+                      {activeParcel.floodInundated ? 'HIGH (Waterlogged)' : 'LOW (Protected)'}
+                    </span>
                   </div>
-                ))}
+                  <div className="flex justify-between">
+                    <span>Threshold Yield Benchmark:</span>
+                    <span className="font-mono text-white">2,450 kg/ha</span>
+                  </div>
+                  <div className="flex justify-between border-t border-slate-700 pt-1">
+                    <span>Insurance Claim Status:</span>
+                    <span className="font-medium text-slate-200">
+                      {activeParcel.floodInundated ? 'Eligible for Fast-Track Settlement' : 'Normal Yield - No Loss Claim'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Proactive Correction Actions */}
-            <div className="pt-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-3">
-              <button
-                type="button"
-                onClick={printHealthCard}
-                className="flex items-center space-x-1.5 px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
-              >
-                <Printer className="w-4 h-4 text-slate-500" />
-                <span>Print Health Card</span>
-              </button>
-
-              {searchedRecord.healthReport.grade !== 'GRADE_A' && (
-                <div>
-                  {correctionRequested ? (
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl inline-flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      Correction Application #MB-2026-9812 Filed with Circle Officer
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setCorrectionRequested(true)}
-                      className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all"
-                    >
-                      <Send className="w-4 h-4" />
-                      <span>Request Proactive Correction (Mission Basundhara)</span>
-                    </button>
-                  )}
+            {/* Cryptographic Footprint & Signature */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-700">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-white rounded-lg border border-slate-600 shrink-0">
+                  <QrCode className="w-12 h-12 text-slate-900" />
                 </div>
-              )}
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase font-mono">Scan QR to Verify on Portal</span>
+                  <span className="text-[11px] text-white font-medium block">https://sasya-drishti.pages.dev/#verify</span>
+                  <span className="text-[10px] text-slate-500 block">Issued on: 22 November 2026</span>
+                </div>
+              </div>
+
+              <div className="text-center sm:text-right">
+                <div className="font-serif italic text-slate-300 text-sm">
+                  Dr. P. K. Goswami
+                </div>
+                <div className="text-[10px] text-slate-400">
+                  Director, Assam State Space Application Centre (ASSAC)
+                </div>
+                <div className="text-[9px] text-slate-500 font-mono">
+                  Govt of Assam &bull; Digitally Signed via e-Pramaan
+                </div>
+              </div>
             </div>
 
           </div>
 
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500 text-xs">
-          No record found for Dag {queryDag} in selected village. Please verify the Dag number.
+          {/* Action Bar (Print / Download) */}
+          <div className="mt-8 pt-4 border-t border-slate-800 flex justify-end gap-3 print:hidden">
+            <button
+              onClick={handlePrint}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-600"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print Certificate</span>
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download PDF</span>
+            </button>
+          </div>
+
         </div>
       )}
 

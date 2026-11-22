@@ -1,4 +1,4 @@
-# Cloudflare Pages Deployment Guide: BhumiSwasthya (ভূমি স্বাস্থ্য)
+# Cloudflare Pages Deployment Guide: SasyaDrishti (শস্য দৃষ্টি)
 
 This project is fully configured for deployment on **Cloudflare Pages** with single-page application (SPA) routing, security headers, and instant edge caching.
 
@@ -10,10 +10,10 @@ This project is fully configured for deployment on **Cloudflare Pages** with sin
    - Navigate to [Cloudflare Dashboard](https://dash.cloudflare.com/) > **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
 
 2. **Select GitHub Repository:**
-   - Select `RonHatibaruah/bhumi-swasthya`.
+   - Select `RonHatibaruah/sasya-drishti-assam`.
 
 3. **Configure Build Settings:**
-   - **Project Name:** `bhumi-swasthya`
+   - **Project Name:** `sasya-drishti` (or `sasya-drishti-assam`)
    - **Production Branch:** `main`
    - **Framework Preset:** `Vite`
    - **Build Command:** `npm run build`
@@ -23,7 +23,7 @@ This project is fully configured for deployment on **Cloudflare Pages** with sin
 
 4. **Click "Save and Deploy":**
    - Cloudflare will clone, build, and deploy the application worldwide in under 60 seconds.
-   - Your live site will be accessible at: `https://bhumi-swasthya.pages.dev` (or your custom domain).
+   - Your live site will be accessible at: `https://sasya-drishti.pages.dev` (or your custom domain).
 
 ---
 
@@ -40,7 +40,7 @@ npm run build
 npx wrangler login
 
 # 3. Deploy to Cloudflare Pages
-npx wrangler pages deploy dist --project-name=bhumi-swasthya
+npx wrangler pages deploy dist --project-name=sasya-drishti
 ```
 
 ---
@@ -48,5 +48,5 @@ npx wrangler pages deploy dist --project-name=bhumi-swasthya
 ## Included Cloudflare Configuration Files
 
 - **`wrangler.toml`**: Specifies project name and `pages_build_output_dir = "dist"`.
-- **`public/_redirects`**: Ensures clean client-side SPA routing (`/* /index.html 200`).
-- **`public/_headers`**: Enforces security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+- **`public/_headers`**: Configures security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+- **`public/_redirects`**: Single-Page App (SPA) redirect rule `/* /index.html 200` to prevent 404s on browser reloads or hash links.
