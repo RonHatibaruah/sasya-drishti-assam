@@ -3,7 +3,7 @@
         xmlns:geo="http://www.google.com/geo/schemas/sitemap/1.0">
   <!-- Main Application Landing Page -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Executive Analytics & Crop Yield Dashboard -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/#dashboard</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/#dashboard</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
 
   <!-- Multi-Tier Remote Sensing & Drone WebGIS Map -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/#satellite-gis</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/#satellite-gis</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -30,7 +30,7 @@
 
   <!-- UAV Drone Missions & Crop Cutting Experiments (CCE) -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/#drone-cce</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/#drone-cce</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -38,7 +38,7 @@
 
   <!-- Farmer Crop Advisory & MSP Yield Certificate Portal -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/#farmer-portal</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/#farmer-portal</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -46,7 +46,7 @@
 
   <!-- Super Admin AI/ML Calibration & Ingestion Command Center -->
   <url>
-    <loc>https://sasya-drishti.pages.dev/#admin-console</loc>
+    <loc>https://sasya-drishti-assam.pages.dev/#admin-console</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

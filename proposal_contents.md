@@ -75,7 +75,7 @@ The estimation pipeline follows a rigorous 4-stage analytical sequence:
 4. **Early-Season Forecasting:** Enables reliable yield predictions 30 to 45 days prior to harvest maturity, giving government bodies actionable foresight.
 
 ### Prototype Status & Verification
-A fully functional, interactive prototype is operational and deployed at **`https://sasya-drishti.pages.dev/`**. The prototype features live WebGIS polygon rendering with Leaflet, multi-layer switching (Yield Heatmap, Sentinel-2 Optical NDVI, Sentinel-1 SAR Radar, UAV Drone Orthomosaics), real-time CCE entry workflows, printable farmer harvest certificates, and a full Super Admin model calibration console.
+A fully functional, interactive prototype is operational and deployed at **`https://sasya-drishti-assam.pages.dev/`**. The prototype features live WebGIS polygon rendering with Leaflet, multi-layer switching (Yield Heatmap, Sentinel-2 Optical NDVI, Sentinel-1 SAR Radar, UAV Drone Orthomosaics), real-time CCE entry workflows, printable farmer harvest certificates, and a full Super Admin model calibration console.
 
 ---
 

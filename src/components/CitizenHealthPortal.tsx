@@ -337,7 +337,7 @@ export const CitizenHealthPortal: React.FC<CitizenHealthPortalProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase font-mono">Scan QR to Verify on Portal</span>
-                  <span className="text-[11px] text-white font-medium block">https://sasya-drishti.pages.dev/#verify</span>
+                  <span className="text-[11px] text-white font-medium block">https://sasya-drishti-assam.pages.dev/#verify</span>
                   <span className="text-[10px] text-slate-500 block">Issued on: 22 November 2026</span>
                 </div>
               </div>

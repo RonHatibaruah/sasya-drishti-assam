@@ -4,11 +4,11 @@
 [![NESFIC 2026](https://img.shields.io/badge/NESFIC_2026-Govt_Track_--_NESFIC--D--12-0284c7?style=for-the-badge)](https://startup.assam.gov.in/nesfic26/problem-statements/nesfic-d-12)
 [![Government of Assam](https://img.shields.io/badge/Government_of_Assam-Dept_of_Science_%26_Technology-064e3b?style=for-the-badge)](https://assac.assam.gov.in/)
 [![Sponsoring Body](https://img.shields.io/badge/Nodal_Agency-ASSAC_Assam_State_Space_Application_Centre-0d9488?style=for-the-badge)](https://assac.assam.gov.in/)
-[![Live Demo](https://img.shields.io/badge/Live_Prototype-sasya--drishti.pages.dev-10b981?style=for-the-badge&logo=cloudflarepages)](https://sasya-drishti.pages.dev/)
+[![Live Demo](https://img.shields.io/badge/Live_Prototype-sasya--drishti.pages.dev-10b981?style=for-the-badge&logo=cloudflarepages)](https://sasya-drishti-assam.pages.dev/)
 [![React 18](https://img.shields.io/badge/Frontend-React_18_%7C_TypeScript_%7C_Tailwind-61dafb?style=for-the-badge&logo=react)](https://react.dev/)
 [![Leaflet GIS](https://img.shields.io/badge/Geospatial-Leaflet_1.9_%7C_Sentinel_1%2F2-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com/)
 
-> 🌐 **Official Interactive Prototype:** **[https://sasya-drishti.pages.dev/](https://sasya-drishti.pages.dev/)**  
+> 🌐 **Official Interactive Prototype:** **[https://sasya-drishti-assam.pages.dev/](https://sasya-drishti-assam.pages.dev/)**  
 > Problem Statement Reference: **[NESFIC-D-12 (Assam Startup Portal)](https://startup.assam.gov.in/nesfic26/problem-statements/nesfic-d-12)**  
 > Explore the multi-district yield leaderboard, Sentinel-1/2 satellite & drone WebGIS viewer, mobile CCE ground-truthing portal, farmer digital harvest certificate generator, and the **Super Admin Operations Command Console (`#admin-console`)**.
 
