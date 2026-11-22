@@ -449,6 +449,8 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
         # Headers and Context-Aware Diagram Insertion
         if line.startswith('## '):
             sec_title = line[3:].strip()
+            if '12. Resources' in sec_title:
+                flowables.append(PageBreak())
             flowables.append(HRFlowable(width="100%", thickness=1, color=BROWN_SECONDARY, spaceBefore=8, spaceAfter=4))
             flowables.append(Paragraph(clean_inline_text(sec_title), styles['h1']))
 

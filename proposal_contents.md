@@ -380,6 +380,16 @@ Existing agricultural yield estimation programs in India (such as the national *
 ### Resource Drivers, Budget Allocation & Pilot Validation Strategy
 The deployment of SasyaDrishti is structured for capital efficiency, leveraging open-access satellite data, existing departmental smartphone devices, and targeted drone pilot sampling to deliver maximum governance impact within the NESFIC MVP grant framework (₹20–40 Lakh tier).
 
+### Indicative Resource & Budget Allocation (₹20–40 Lakh Tier)
+
+| Budget Head / Cost Driver | Allocation (%) | Indicative Amount (₹ Lakh) | Scope & Key Deliverables |
+| :--- | :---: | :---: | :--- |
+| **UAV Drone Fleet & Sensor Rentals** | **35%** | **₹10.5 Lakh** | DGCA-certified pilot missions, 5-band multispectral MicaSense RedEdge calibration, 50,000 ha orthomosaic photogrammetry |
+| **Cloud & Geospatial Compute** | **25%** | **₹7.5 Lakh** | PostGIS 16 spatial DB, GPU compute (NVIDIA A10G/T4) for deep learning ConvLSTM, Cloudflare edge hosting |
+| **Engineering Personnel & Technical Team** | **25%** | **₹7.5 Lakh** | Remuneration for Remote Sensing Scientist, ML Engineer, Geospatial Developer, and Senior Agronomist |
+| **Field Equipment & CCE Digital Toolkits** | **15%** | **₹4.5 Lakh** | Digital grain moisture meters (14% std), 5m×5m quadrant ropes, portable balances, ADO field workshops |
+| **Total Indicative MVP Budget** | **100%** | **₹30.0 Lakh** | **Complete 12-Month Development, Calibration & 3-District Operational Pilot** |
+
 ### Key Cost Drivers & Resource Breakdown
 1. **Cloud & High-Performance Geospatial Compute (25%):** PostGIS 16 spatial database instances, Cloudflare Pages edge hosting, and GPU compute instances (NVIDIA T4/A10G) for training deep-learning Bi-LSTM time-series models.
 2. **UAV Drone Fleet Missions & Sensor Payload Rentals (35%):** DGCA-certified drone pilot service contracts, MicaSense RedEdge 5-band multispectral sensor calibration, and photogrammetry cloud processing over 50,000 hectares of pilot clusters.
