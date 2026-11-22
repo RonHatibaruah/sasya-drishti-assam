@@ -142,7 +142,7 @@ export const DroneTechShowcase: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="#drone-cce"
-              className="inline-flex items-center space-x-2 bg-amber-800 hover:bg-amber-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+              className="inline-flex items-center space-x-2 bg-amber-800 hover:bg-amber-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             >
               <Plane className="w-4 h-4" />
               <span>Go to Field CCE Dispatcher</span>
@@ -152,6 +152,30 @@ export const DroneTechShowcase: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Visual Resolution Hierarchy Banner */}
+      <div className="bg-white rounded-xl shadow-xs border border-amber-900/10 p-5 overflow-hidden">
+        <div className="flex items-center justify-between mb-3 border-b border-stone-200 pb-2">
+          <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
+            <Layers className="w-4 h-4 text-amber-800" />
+            <span>Multi-Tier Spatial Resolution Hierarchy: Coarse Satellite to 3.5cm Drone</span>
+          </div>
+          <a
+            href="/proposal_diagrams/diagram_3_smallholder_resolution_stack.png"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-amber-800 hover:text-amber-950 font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            <span>View Fullscreen</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+        <img 
+          src="/proposal_diagrams/diagram_3_smallholder_resolution_stack.png" 
+          alt="Smallholder Parcel Resolution Stack" 
+          className="w-full rounded-lg border border-stone-200 shadow-2xs"
+        />
       </div>
 
       {/* Airframe Architecture: VTOL vs Quadcopter */}

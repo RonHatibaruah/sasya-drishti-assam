@@ -10,7 +10,10 @@ import {
   CheckCircle2, 
   ArrowRight, 
   Waves,
-  Cpu
+  Cpu,
+  ExternalLink,
+  Layers,
+  Image as ImageIcon
 } from 'lucide-react';
 import { ActiveTab } from './Navbar';
 
@@ -25,9 +28,19 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
   onClose,
   onNavigateTab
 }) => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'architecture' | 'ai_models' | 'walkthrough'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'architecture' | 'ai_models' | 'walkthrough' | 'diagrams'>('overview');
 
   if (!isOpen) return null;
+
+  const ALL_DIAGRAMS = [
+    { id: 1, title: 'Figure 1: Operational Paradigm Shift (Conventional vs. SasyaDrishti)', src: '/proposal_diagrams/diagram_1_paradigm_shift.png', desc: 'Comparison of conventional cloud-blind, paper-delayed estimation against SasyaDrishti all-weather multi-source AI fusion.' },
+    { id: 2, title: 'Figure 2: All-Weather Remote Sensing: SAR Radar Cloud Penetration Physics', src: '/proposal_diagrams/diagram_2_monsoon_sar_physics.png', desc: 'C-band (5.6 cm) microwave radar penetration through 80% monsoon clouds, with VH biomass volume scattering and VV flood mapping.' },
+    { id: 3, title: 'Figure 3: Smallholder Parcel Resolution Stack (Space-borne to 3.5cm Drone)', src: '/proposal_diagrams/diagram_3_smallholder_resolution_stack.png', desc: 'Resolution hierarchy resolving fragmented Assam Bigha holdings and sub-meter micro-bund boundaries (Ali).' },
+    { id: 4, title: 'Figure 4: SasyaDrishti 4-Tier End-to-End Enterprise Architecture', src: '/proposal_diagrams/diagram_4_enterprise_system_architecture.png', desc: 'Ingestion Gateway, Preprocessing Pipeline, Hybrid AI + WOFOST Biophysical Engine, and Edge Delivery Tier.' },
+    { id: 5, title: 'Figure 5: Digital CCE Moisture Normalization & AI Recalibration Loop', src: '/proposal_diagrams/diagram_5_cce_moisture_normalization_loop.png', desc: 'Mobile-first field cut logger with 14% storage equilibrium moisture formula feeding dynamic AI model recalibration.' },
+    { id: 6, title: 'Figure 6: 12-Month Indicative Gantt Roadmap & Cropping Milestones', src: '/proposal_diagrams/diagram_6_indicative_gantt_roadmap.png', desc: '5-phase development timeline synchronized with Assam Kharif Sali paddy and Rabi mustard harvesting cycles.' },
+    { id: 7, title: 'Figure 7: Tamper-Proof Digital Crop Yield Certificate Trust Architecture', src: '/proposal_diagrams/diagram_7_verifiable_certificate_flow.png', desc: 'End-to-end cryptographic SHA-256 hashing and scannable QR verification for FCI/AFCSCL MSP quotas and PMFBY claims.' }
+  ];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -107,6 +120,17 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
           >
             4. Portals &amp; Operations Tour
           </button>
+
+          <button
+            onClick={() => setActiveSection('diagrams')}
+            className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+              activeSection === 'diagrams'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            5. Visual Infographics Gallery ({ALL_DIAGRAMS.length})
+          </button>
         </div>
 
         {/* Modal Body */}
@@ -129,26 +153,16 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2">
-                  <span className="font-bold text-stone-900 block">Traditional Manual Approach</span>
-                  <ul className="space-y-1 text-stone-600 list-disc list-inside text-[11px]">
-                    <li>Dispersed manual revenue patwari/ADO inspection</li>
-                    <li>Delayed yield reports 3–4 months post-harvest</li>
-                    <li>Ad-hoc flood loss claims with high dispute rates</li>
-                    <li>Impedes timely MSP procurement planning for FCI</li>
-                  </ul>
+              {/* Embedded Infographic Figure 1 */}
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-xs text-stone-900">Figure 1: Operational Paradigm Shift</span>
+                  <a href="/proposal_diagrams/diagram_1_paradigm_shift.png" target="_blank" rel="noreferrer" className="text-[11px] text-amber-800 font-semibold flex items-center gap-1">
+                    <span>Fullscreen</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
-
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2">
-                  <span className="font-bold text-amber-950 block">SasyaDrishti Multi-Source Engine</span>
-                  <ul className="space-y-1 text-stone-700 list-disc list-inside text-[11px]">
-                    <li><b>100% All-Weather Monitoring:</b> Sentinel-1 C-band SAR radar penetrates cloud cover</li>
-                    <li><b>Centimeter UAV Detail:</b> 3.5 cm/px multispectral drone scans for crop stress &amp; density</li>
-                    <li><b>Digital CCE Logging:</b> Real-time moisture-corrected ground-truth cuts</li>
-                    <li><b>Instant Yield Certification:</b> Cryptographic tokens for MSP and PMFBY claims</li>
-                  </ul>
-                </div>
+                <img src="/proposal_diagrams/diagram_1_paradigm_shift.png" alt="Paradigm Shift Diagram" className="w-full rounded-lg border border-stone-200" />
               </div>
             </div>
           )}
@@ -160,46 +174,28 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
                 4-Tier Multi-Sensor Fusion Pipeline
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-1.5">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold">
-                    <Waves className="w-4 h-4" />
-                    <span>Tier 1: Sentinel-1 C-Band SAR Radar</span>
-                  </div>
-                  <p className="text-stone-600 text-[11px]">
-                    Dual-polarization (VV/VH) microwave radar penetrates rain clouds. In flooded rice paddies, cross-polarization VH backscatter directly tracks volume scattering from standing rice canopies to quantify fresh biomass, while co-polarized (VV) detects standing water (&le; -16.5 dB) for real-time flood inundation mapping.
-                  </p>
+              {/* Embedded Infographic Figure 2 */}
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-xs text-stone-900">Figure 2: Sentinel-1 SAR Radar Cloud Penetration Physics</span>
+                  <a href="/proposal_diagrams/diagram_2_monsoon_sar_physics.png" target="_blank" rel="noreferrer" className="text-[11px] text-amber-800 font-semibold flex items-center gap-1">
+                    <span>Fullscreen</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
+                <img src="/proposal_diagrams/diagram_2_monsoon_sar_physics.png" alt="Monsoon SAR Radar Physics" className="w-full rounded-lg border border-stone-200" />
+              </div>
 
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-1.5">
-                  <div className="flex items-center gap-2 text-emerald-800 font-bold">
-                    <Satellite className="w-4 h-4" />
-                    <span>Tier 2: Sentinel-2 Multispectral Optical</span>
-                  </div>
-                  <p className="text-stone-600 text-[11px]">
-                    10m resolution bands compute multi-temporal NDVI, EVI (photosynthetic activity), and NDWI (canopy moisture content) on cloud-free acquisition windows to monitor vegetative vigour.
-                  </p>
+              {/* Embedded Infographic Figure 4 */}
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-xs text-stone-900">Figure 4: 4-Tier End-to-End Enterprise Architecture</span>
+                  <a href="/proposal_diagrams/diagram_4_enterprise_system_architecture.png" target="_blank" rel="noreferrer" className="text-[11px] text-amber-800 font-semibold flex items-center gap-1">
+                    <span>Fullscreen</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
-
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-1.5">
-                  <div className="flex items-center gap-2 text-purple-900 font-bold">
-                    <Plane className="w-4 h-4" />
-                    <span>Tier 3: UAV Drone Multispectral Orthomosaics</span>
-                  </div>
-                  <p className="text-stone-600 text-[11px]">
-                    Sub-5cm drone flights over pilot agricultural clusters extract Canopy Height Models (CHM), detect micro-level pest stress, and measure plant emergence density.
-                  </p>
-                </div>
-
-                <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-1.5">
-                  <div className="flex items-center gap-2 text-amber-800 font-bold">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Tier 4: Field CCE Ground-Truthing</span>
-                  </div>
-                  <p className="text-stone-600 text-[11px]">
-                    Standardized 5m &times; 5m quadrant harvest cuts logged with moisture meter readings dynamically anchor and calibrate machine learning regression weights.
-                  </p>
-                </div>
+                <img src="/proposal_diagrams/diagram_4_enterprise_system_architecture.png" alt="Enterprise System Architecture" className="w-full rounded-lg border border-stone-200" />
               </div>
             </div>
           )}
@@ -230,6 +226,18 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
                     Integrates daily solar radiation, temperature, and rainfall from Assam Automatic Weather Stations (AWS) to enforce physical biological boundaries on predicted yields.
                   </div>
                 </div>
+              </div>
+
+              {/* Embedded Infographic Figure 5 */}
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-xs text-stone-900">Figure 5: CCE Moisture Normalization &amp; Calibration Loop</span>
+                  <a href="/proposal_diagrams/diagram_5_cce_moisture_normalization_loop.png" target="_blank" rel="noreferrer" className="text-[11px] text-amber-800 font-semibold flex items-center gap-1">
+                    <span>Fullscreen</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <img src="/proposal_diagrams/diagram_5_cce_moisture_normalization_loop.png" alt="CCE Moisture Normalization" className="w-full rounded-lg border border-stone-200" />
               </div>
             </div>
           )}
@@ -325,6 +333,44 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
                   </div>
                   <ArrowRight className="w-4 h-4 text-stone-400" />
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* 5. Complete Diagrams Gallery */}
+          {activeSection === 'diagrams' && (
+            <div className="space-y-6">
+              <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-4">
+                <h4 className="font-bold text-stone-900 text-sm flex items-center gap-2 mb-1">
+                  <ImageIcon className="w-4 h-4 text-amber-800" />
+                  <span>Official NESFIC-D-12 Infographics &amp; Architecture Diagrams</span>
+                </h4>
+                <p className="text-stone-700 text-xs">
+                  These 7 high-resolution diagrams are embedded directly in the official proposal submission dossier to visually articulate every phase of the crop yield estimation pipeline.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {ALL_DIAGRAMS.map((d) => (
+                  <div key={d.id} className="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+                      <div>
+                        <h5 className="font-bold text-xs text-stone-900">{d.title}</h5>
+                        <p className="text-[11px] text-stone-500">{d.desc}</p>
+                      </div>
+                      <a
+                        href={d.src}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs bg-white hover:bg-stone-100 text-stone-800 px-3 py-1.5 rounded-lg border border-stone-300 font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+                      >
+                        <span>Open Full Size</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                    <img src={d.src} alt={d.title} className="w-full rounded-lg border border-stone-200 shadow-2xs" />
+                  </div>
+                ))}
               </div>
             </div>
           )}

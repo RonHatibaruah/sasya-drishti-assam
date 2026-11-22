@@ -9,14 +9,15 @@ from reportlab.platypus import (
 )
 from reportlab.pdfgen import canvas
 
-NAVY_PRIMARY = colors.HexColor("#0c2340")
-NAVY_SECONDARY = colors.HexColor("#1e3a8a")
-TEAL_ACCENT = colors.HexColor("#0284c7")
-GREEN_ACCENT = colors.HexColor("#059669")
-TEXT_DARK = colors.HexColor("#0f172a")
-TEXT_MUTED = colors.HexColor("#475569")
-BORDER_LIGHT = colors.HexColor("#cbd5e1")
-BG_LIGHT = colors.HexColor("#f8fafc")
+# Warm Agricultural Brown Theme Palette
+BROWN_PRIMARY = colors.HexColor("#2d1b11")
+BROWN_SECONDARY = colors.HexColor("#4a2c11")
+WARM_AMBER = colors.HexColor("#78350f")
+GOLD_ACCENT = colors.HexColor("#d97706")
+TEXT_DARK = colors.HexColor("#1c1917")
+TEXT_MUTED = colors.HexColor("#57534e")
+BORDER_LIGHT = colors.HexColor("#d6d3d1")
+BG_LIGHT = colors.HexColor("#fdfbf7")
 
 class D12NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
@@ -60,7 +61,6 @@ def clean_inline_text(text):
     if not text:
         return ""
     t = text.strip()
-    # Replacements for safe rendering
     t = t.replace('₹', 'Rs. ')
     t = t.replace('শস্য দৃষ্টি', 'SasyaDrishti')
     t = t.replace('–', '-').replace('—', ' - ')
@@ -68,14 +68,12 @@ def clean_inline_text(text):
     t = t.replace('≤', '<=').replace('≥', '>=').replace('±', '+/-')
     t = t.replace('×', 'x')
     
-    # Escape XML
     t = escape(t)
     
-    # Re-apply HTML tags for bold/italics/code
     t = re.sub(r'\*\*\*(.*?)\*\*\*', r'<b><i>\1</i></b>', t)
     t = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', t)
     t = re.sub(r'\*(.*?)\*', r'<i>\1</i>', t)
-    t = re.sub(r'`(.*?)`', r'<font face="Courier" color="#1e3a8a">\1</font>', t)
+    t = re.sub(r'`(.*?)`', r'<font face="Courier" color="#78350f">\1</font>', t)
     return t
 
 def setup_styles():
@@ -85,31 +83,31 @@ def setup_styles():
         'DocTitle',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=20,
-        leading=24,
-        textColor=NAVY_PRIMARY,
-        spaceAfter=6
+        fontSize=18,
+        leading=22,
+        textColor=BROWN_PRIMARY,
+        spaceAfter=5
     )
     
     subtitle_style = ParagraphStyle(
         'DocSubtitle',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=10,
-        leading=14,
+        fontSize=9.5,
+        leading=13,
         textColor=TEXT_MUTED,
-        spaceAfter=12
+        spaceAfter=10
     )
 
     h1_style = ParagraphStyle(
         'SectionH1',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=16,
-        textColor=NAVY_PRIMARY,
-        spaceBefore=14,
-        spaceAfter=6,
+        fontSize=12,
+        leading=15,
+        textColor=BROWN_PRIMARY,
+        spaceBefore=12,
+        spaceAfter=5,
         keepWithNext=True
     )
 
@@ -117,11 +115,11 @@ def setup_styles():
         'SectionH2',
         parent=styles['Heading2'],
         fontName='Helvetica-Bold',
-        fontSize=11,
-        leading=14,
-        textColor=NAVY_SECONDARY,
-        spaceBefore=8,
-        spaceAfter=4,
+        fontSize=10.5,
+        leading=13.5,
+        textColor=WARM_AMBER,
+        spaceBefore=7,
+        spaceAfter=3,
         keepWithNext=True
     )
 
@@ -129,11 +127,11 @@ def setup_styles():
         'SectionH3',
         parent=styles['Heading3'],
         fontName='Helvetica-Bold',
-        fontSize=9.5,
-        leading=12,
-        textColor=TEAL_ACCENT,
-        spaceBefore=6,
-        spaceAfter=3,
+        fontSize=9,
+        leading=11.5,
+        textColor=GOLD_ACCENT,
+        spaceBefore=5,
+        spaceAfter=2,
         keepWithNext=True
     )
 
@@ -141,30 +139,41 @@ def setup_styles():
         'Body',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=9,
-        leading=12.5,
+        fontSize=8.5,
+        leading=11.5,
         textColor=TEXT_DARK,
-        spaceAfter=5
+        spaceAfter=4
     )
 
     bullet_style = ParagraphStyle(
         'Bullet',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=8.5,
-        leading=11.5,
+        fontSize=8,
+        leading=11,
         textColor=TEXT_DARK,
-        leftIndent=14,
-        firstLineIndent=-10,
-        spaceAfter=3
+        leftIndent=12,
+        firstLineIndent=-8,
+        spaceAfter=2.5
+    )
+
+    caption_style = ParagraphStyle(
+        'Caption',
+        parent=styles['Normal'],
+        fontName='Helvetica-Oblique',
+        fontSize=7.5,
+        leading=9.5,
+        textColor=TEXT_MUTED,
+        alignment=1, # Centered
+        spaceAfter=6
     )
 
     table_cell_style = ParagraphStyle(
         'TableCell',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=7.5,
-        leading=9.5,
+        fontSize=7.2,
+        leading=9,
         textColor=TEXT_DARK
     )
 
@@ -194,10 +203,24 @@ def setup_styles():
         'h3': h3_style,
         'body': body_style,
         'bullet': bullet_style,
+        'caption': caption_style,
         'table_cell': table_cell_style,
         'table_header': table_header_style,
         'meta_banner': meta_banner_style
     }
+
+def get_diagram_flowable(diagram_filename, caption_text, styles, width=490, height=265):
+    img_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'proposal_diagrams')
+    img_path = os.path.join(img_dir, diagram_filename)
+    if os.path.exists(img_path):
+        return [
+            Spacer(1, 4),
+            Image(img_path, width=width, height=height),
+            Spacer(1, 2),
+            Paragraph(f"<b>Figure:</b> {caption_text}", styles['caption']),
+            Spacer(1, 4)
+        ]
+    return []
 
 def parse_markdown_blocks(lines, styles, avail_width=504):
     flowables = []
@@ -216,7 +239,6 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
                 table_lines.append(lines[i].strip())
                 i += 1
             
-            # Parse table
             headers = [c.strip() for c in table_lines[0].split('|')[1:-1]]
             rows_data = []
             for t_line in table_lines[2:]:
@@ -228,31 +250,29 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
             if col_count > 0:
                 col_w = avail_width / col_count
                 t_matrix = []
-                # Header row
                 h_row = [Paragraph(clean_inline_text(h), styles['table_header']) for h in headers]
                 t_matrix.append(h_row)
                 for r in rows_data:
-                    # Pad if cells mismatch
                     padded = r + [''] * (col_count - len(r))
                     row_cells = [Paragraph(clean_inline_text(c), styles['table_cell']) for c in padded[:col_count]]
                     t_matrix.append(row_cells)
                 
                 tbl = Table(t_matrix, colWidths=[col_w]*col_count)
                 tbl.setStyle(TableStyle([
-                    ('BACKGROUND', (0,0), (-1,0), NAVY_PRIMARY),
+                    ('BACKGROUND', (0,0), (-1,0), BROWN_PRIMARY),
                     ('TEXTCOLOR', (0,0), (-1,0), colors.white),
                     ('ALIGN', (0,0), (-1,-1), 'LEFT'),
                     ('VALIGN', (0,0), (-1,-1), 'TOP'),
                     ('GRID', (0,0), (-1,-1), 0.5, BORDER_LIGHT),
                     ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, BG_LIGHT]),
-                    ('TOPPADDING', (0,0), (-1,-1), 3),
-                    ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-                    ('LEFTPADDING', (0,0), (-1,-1), 4),
-                    ('RIGHTPADDING', (0,0), (-1,-1), 4),
+                    ('TOPPADDING', (0,0), (-1,-1), 2.5),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+                    ('LEFTPADDING', (0,0), (-1,-1), 3.5),
+                    ('RIGHTPADDING', (0,0), (-1,-1), 3.5),
                 ]))
-                flowables.append(Spacer(1, 4))
+                flowables.append(Spacer(1, 3))
                 flowables.append(tbl)
-                flowables.append(Spacer(1, 4))
+                flowables.append(Spacer(1, 3))
             continue
 
         # Code block (preformatted / ASCII architecture)
@@ -262,42 +282,56 @@ def parse_markdown_blocks(lines, styles, avail_width=504):
             while i < len(lines) and not lines[i].strip().startswith('```'):
                 code_lines.append(lines[i])
                 i += 1
-            i += 1  # Skip closing ```
+            i += 1
             code_str = "\n".join(code_lines)
             code_style = ParagraphStyle(
                 'AsciiBox',
                 parent=styles['body'],
                 fontName='Courier',
-                fontSize=6.5,
-                leading=8,
-                textColor=NAVY_PRIMARY
+                fontSize=6,
+                leading=7.5,
+                textColor=BROWN_PRIMARY
             )
             flowables.append(Spacer(1, 3))
             flowables.append(Paragraph(f"<pre>{escape(code_str)}</pre>", code_style))
             flowables.append(Spacer(1, 3))
             continue
 
-        # Headers
-        if line.startswith('### '):
+        # Headers and Context-Aware Diagram Insertion
+        if line.startswith('## '):
+            sec_title = line[3:].strip()
+            flowables.append(HRFlowable(width="100%", thickness=1, color=BROWN_SECONDARY, spaceBefore=8, spaceAfter=4))
+            flowables.append(Paragraph(clean_inline_text(sec_title), styles['h1']))
+
+            # Check if this section matches a diagram
+            if '1. Problem understanding' in sec_title or '1. Problem Statement' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_1_paradigm_shift.png', 'Operational Paradigm Shift: Conventional vs. SasyaDrishti Workflow', styles))
+            elif '2. Proposed solution' in sec_title or 'Proposed Solution' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_2_monsoon_sar_physics.png', 'All-Weather Remote Sensing: Sentinel-1 C-Band SAR Cloud Penetration Physics', styles))
+            elif '3. Describe User Journey' in sec_title or 'User Journey' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_3_smallholder_resolution_stack.png', 'Multi-Tier Spatial Resolution Stack: Space-borne to Centimeter Drone Sensors', styles))
+            elif '4. Technology & solution architecture' in sec_title or 'System Architecture' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_4_enterprise_system_architecture.png', 'SasyaDrishti 4-Tier End-to-End Enterprise System Architecture', styles))
+            elif '5. Development methodology' in sec_title or 'Methodology' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_5_cce_moisture_normalization_loop.png', 'Digital Crop Cutting Experiment (CCE) Moisture Standardization & AI Feedback Loop', styles))
+            elif '6. Development timeline' in sec_title or 'Timeline' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_6_indicative_gantt_roadmap.png', '12-Month Indicative Phased Roadmap Synchronized with Assam Agricultural Seasons', styles))
+            elif '10. Security' in sec_title or 'Compliance' in sec_title:
+                flowables.extend(get_diagram_flowable('diagram_7_verifiable_certificate_flow.png', 'Tamper-Proof Digital Certificate Trust Architecture with SHA-256 Hashing', styles))
+
+        elif line.startswith('### '):
             flowables.append(Paragraph(clean_inline_text(line[4:]), styles['h2']))
         elif line.startswith('#### '):
             flowables.append(Paragraph(clean_inline_text(line[5:]), styles['h3']))
-        elif line.startswith('## '):
-            flowables.append(HRFlowable(width="100%", thickness=1, color=NAVY_SECONDARY, spaceBefore=8, spaceAfter=4))
-            flowables.append(Paragraph(clean_inline_text(line[3:]), styles['h1']))
         elif line.startswith('# '):
             flowables.append(Paragraph(clean_inline_text(line[2:]), styles['title']))
-        # Horizontal rule
         elif line.startswith('---'):
             flowables.append(HRFlowable(width="100%", thickness=0.5, color=BORDER_LIGHT, spaceBefore=4, spaceAfter=4))
-        # Bullet item
         elif line.startswith('- ') or line.startswith('* ') or re.match(r'^\d+\.\s+', line):
-            # Clean lead
             item_text = re.sub(r'^([-*]|\d+\.)\s+', '', line)
             bullet_sym = '• ' if line.startswith(('-', '*')) else f"{line.split()[0]} "
             flowables.append(Paragraph(f"{bullet_sym}{clean_inline_text(item_text)}", styles['bullet']))
         else:
-            # Paragraph
             flowables.append(Paragraph(clean_inline_text(line), styles['body']))
         
         i += 1
@@ -343,10 +377,9 @@ def build_pdf(md_filename, pdf_filename, doc_title, subtitle):
         ('RIGHTPADDING', (0,0), (-1,-1), 0),
     ]))
     story.append(banner_table)
-    story.append(HRFlowable(width="100%", thickness=1.5, color=NAVY_PRIMARY, spaceBefore=4, spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=BROWN_PRIMARY, spaceBefore=4, spaceAfter=8))
     
     lines = md_text.split('\n')
-    # Filter out initial H1 if duplicate
     if lines and lines[0].startswith('# '):
         lines = lines[1:]
     
@@ -358,7 +391,7 @@ def build_pdf(md_filename, pdf_filename, doc_title, subtitle):
     print(f"Successfully generated {pdf_path} ({size_mb:.2f} MB)")
 
 if __name__ == '__main__':
-    # 1. Proposal PDF
+    # 1. Proposal PDF with Embedded Infographics
     build_pdf(
         'proposal_contents.md',
         'NESFIC_D12_Proposal_Ron_Hatibaruah.pdf',
@@ -366,7 +399,7 @@ if __name__ == '__main__':
         'AI-Powered Crop Yield & Production Estimation Platform Using Satellite/UAV & Field Data'
     )
     
-    # 2. Proof of Work Dossier PDF
+    # 2. Proof of Work Dossier PDF with Embedded Infographics
     build_pdf(
         'proof_of_work_dossier.md',
         'NESFIC_D12_Proof_of_Work_Ron_Hatibaruah.pdf',
