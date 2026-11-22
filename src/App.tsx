@@ -124,7 +124,7 @@ export function App() {
   }, [districtSummaries]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
       
       {/* Top Navbar */}
       <Navbar
@@ -211,15 +211,15 @@ export function App() {
       />
 
       {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-800 py-6 text-xs text-slate-400 mt-12">
+      <footer className="bg-[#0c2340] border-t border-blue-900 py-6 text-xs text-blue-200 mt-12 shadow-inner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span className="font-semibold text-slate-200">SasyaDrishti (শস্য দৃষ্টি)</span>
-            <span>&bull;</span>
-            <span>NESFIC-D-12 Official Prototype</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span className="font-semibold text-white">SasyaDrishti (শস্য দৃষ্টি)</span>
+            <span className="text-blue-300">&bull;</span>
+            <span className="text-blue-200">NESFIC-D-12 Official Prototype</span>
           </div>
-          <div className="text-center md:text-right text-slate-500">
+          <div className="text-center md:text-right text-blue-300">
             Assam State Space Application Centre (ASSAC) &bull; Department of Science &amp; Technology, Government of Assam
           </div>
         </div>

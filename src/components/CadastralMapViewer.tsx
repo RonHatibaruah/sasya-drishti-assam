@@ -6,15 +6,9 @@ import {
   Satellite, 
   Plane, 
   Waves, 
-  MapPin, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Sparkles, 
-  Eye, 
-  FileCheck2,
   TrendingUp,
-  Compass,
-  Zap
+  FileCheck2,
+  AlertTriangle
 } from 'lucide-react';
 import { CropParcelRecord } from '../types/cropYield';
 import { kgHaToQuintalsPerBigha } from '../services/cropYieldEngine';
@@ -86,7 +80,7 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
     // Labels & Borders Overlay
     L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
-      opacity: 0.6
+      opacity: 0.65
     }).addTo(map);
 
     const polygonGroup = L.layerGroup().addTo(map);
@@ -108,37 +102,34 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
     group.clearLayers();
 
     displayedParcels.forEach((parcel) => {
-      // Determine polygon color based on active layer
-      let fillColor = '#10b981'; // default emerald
+      let fillColor = '#10b981';
       let strokeColor = '#059669';
-      let fillOpacity = 0.65;
+      let fillOpacity = 0.68;
 
       if (activeLayer === 'YIELD') {
         if (parcel.yieldGrade === 'EXCELLENT') {
-          fillColor = '#10b981';
-          strokeColor = '#34d399';
+          fillColor = '#059669';
+          strokeColor = '#10b981';
         } else if (parcel.yieldGrade === 'NORMAL') {
-          fillColor = '#0284c7';
-          strokeColor = '#38bdf8';
+          fillColor = '#1d4ed8';
+          strokeColor = '#3b82f6';
         } else if (parcel.yieldGrade === 'BELOW_AVERAGE') {
           fillColor = '#d97706';
-          strokeColor = '#fbbf24';
+          strokeColor = '#f59e0b';
         } else {
-          fillColor = '#ef4444';
-          strokeColor = '#f87171';
+          fillColor = '#dc2626';
+          strokeColor = '#ef4444';
         }
       } else if (activeLayer === 'NDVI') {
-        // Green colour scale based on NDVI
         if (parcel.spectralIndices.ndvi >= 0.7) fillColor = '#15803d';
         else if (parcel.spectralIndices.ndvi >= 0.5) fillColor = '#65a30d';
         else if (parcel.spectralIndices.ndvi >= 0.35) fillColor = '#ca8a04';
         else fillColor = '#b91c1c';
         strokeColor = '#fde047';
       } else if (activeLayer === 'SAR') {
-        // SAR radar backscatter: flooded/standing water has very low backscatter (<-16 dB) -> dark blue/purple
         if (parcel.spectralIndices.sarBackscatterVvDb <= -16.5 || parcel.floodInundated) {
-          fillColor = '#3b82f6';
-          strokeColor = '#93c5fd';
+          fillColor = '#2563eb';
+          strokeColor = '#60a5fa';
           fillOpacity = 0.85;
         } else {
           fillColor = '#64748b';
@@ -147,11 +138,11 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
         }
       } else if (activeLayer === 'DRONE') {
         if (parcel.uavSurveyed) {
-          fillColor = '#8b5cf6';
-          strokeColor = '#c4b5fd';
+          fillColor = '#7c3aed';
+          strokeColor = '#a78bfa';
           fillOpacity = 0.80;
         } else {
-          fillColor = '#334155';
+          fillColor = '#475569';
           strokeColor = '#64748b';
           fillOpacity = 0.35;
         }
@@ -164,7 +155,6 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
         fillOpacity
       });
 
-      // Tooltip
       polygon.bindTooltip(`
         <div style="font-family: sans-serif; font-size: 11px;">
           <b>Dag #${parcel.dagNumber}</b> (${parcel.village})<br/>
@@ -174,7 +164,6 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
         </div>
       `, { sticky: true });
 
-      // Click Handler
       polygon.on('click', () => {
         setSelectedParcel(parcel);
         onSelectParcel(parcel);
@@ -189,20 +178,20 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
     <div className="space-y-4">
       
       {/* Map Control Header */}
-      <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
         
         {/* Layer Switcher Tabs */}
         <div>
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
+          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5">
             Remote Sensing Layer Overlay:
           </span>
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-700">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
             <button
               onClick={() => setActiveLayer('YIELD')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeLayer === 'YIELD'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  ? 'bg-[#0c2340] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
@@ -211,34 +200,34 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
 
             <button
               onClick={() => setActiveLayer('NDVI')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeLayer === 'NDVI'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  ? 'bg-blue-800 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
-              <Satellite className="w-3.5 h-3.5 text-emerald-400" />
+              <Satellite className="w-3.5 h-3.5 text-blue-300" />
               <span>Sentinel-2 Optical NDVI</span>
             </button>
 
             <button
               onClick={() => setActiveLayer('SAR')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeLayer === 'SAR'
-                  ? 'bg-cyan-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  ? 'bg-blue-800 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               <Waves className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Sentinel-1 SAR Radar (Flood/Water)</span>
+              <span>Sentinel-1 SAR Radar (Flood)</span>
             </button>
 
             <button
               onClick={() => setActiveLayer('DRONE')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeLayer === 'DRONE'
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  ? 'bg-purple-800 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               <Plane className="w-3.5 h-3.5 text-purple-300" />
@@ -249,11 +238,11 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
 
         {/* District Focus Switcher */}
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-slate-400">Map Focus:</span>
+          <span className="text-xs font-semibold text-slate-600">Map Focus:</span>
           <select
             value={activeDistrictView}
             onChange={(e) => setActiveDistrictView(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-emerald-500 cursor-pointer"
+            className="bg-slate-50 border border-slate-300 text-slate-800 font-medium text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-blue-600 cursor-pointer"
           >
             <option value="Kamrup Metro">Kamrup Metro (Sonapur)</option>
             <option value="Nagaon">Nagaon (Samaguri)</option>
@@ -271,24 +260,24 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* Leaflet Map Container */}
-        <div className="lg:col-span-2 bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden shadow-sm relative h-[560px]">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs relative h-[560px]">
           <div ref={mapContainerRef} className="w-full h-full z-10" />
 
           {/* Floating Map Legend */}
-          <div className="absolute bottom-4 left-4 z-20 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-lg p-3 text-[11px] text-slate-300 shadow-lg pointer-events-auto max-w-xs">
-            <div className="font-semibold text-white mb-1.5 flex items-center justify-between">
+          <div className="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200 rounded-lg p-3 text-[11px] text-slate-700 shadow-md pointer-events-auto max-w-xs">
+            <div className="font-bold text-slate-900 mb-1.5 flex items-center justify-between border-b border-slate-200 pb-1">
               <span>Map Legend ({activeLayer})</span>
-              <span className="text-[10px] text-slate-400 font-mono">1:15,000</span>
+              <span className="text-[10px] text-slate-500 font-mono">1:15,000</span>
             </div>
             
             {activeLayer === 'YIELD' && (
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-emerald-500"></span>
+                  <span className="w-3 h-3 rounded-sm bg-emerald-600"></span>
                   <span>Excellent Yield (&gt;2,800 kg/ha)</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-sky-500"></span>
+                  <span className="w-3 h-3 rounded-sm bg-blue-700"></span>
                   <span>Normal Benchmark (2,400–2,800 kg/ha)</span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -296,7 +285,7 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
                   <span>Below Average (1,800–2,400 kg/ha)</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-red-500"></span>
+                  <span className="w-3 h-3 rounded-sm bg-red-600"></span>
                   <span>Stressed / Flood Inundated (&lt;1,800 kg/ha)</span>
                 </div>
               </div>
@@ -326,14 +315,14 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
             {activeLayer === 'SAR' && (
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-blue-500"></span>
+                  <span className="w-3 h-3 rounded-sm bg-blue-600"></span>
                   <span>Submerged / Waterlogged (VV &le; -16.5 dB)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="w-3 h-3 rounded-sm bg-slate-500"></span>
                   <span>Standing Crop / Soil Backscatter (&gt; -15 dB)</span>
                 </div>
-                <p className="text-[10px] text-cyan-300 mt-1 italic">
+                <p className="text-[10px] text-blue-900 font-medium mt-1 italic">
                   *Sentinel-1 C-Band SAR penetrates monsoon cloud cover
                 </p>
               </div>
@@ -342,11 +331,11 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
             {activeLayer === 'DRONE' && (
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-purple-500"></span>
+                  <span className="w-3 h-3 rounded-sm bg-purple-600"></span>
                   <span>UAV Multispectral 5-Band Coverage (3.5 cm/px)</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-sm bg-slate-600"></span>
+                  <span className="w-3 h-3 rounded-sm bg-slate-400"></span>
                   <span>Satellite Remote Sensing Only</span>
                 </div>
               </div>
@@ -355,50 +344,50 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
         </div>
 
         {/* Selected Parcel Inspector Sidebar */}
-        <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 shadow-sm flex flex-col justify-between h-[560px] overflow-y-auto">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between h-[560px] overflow-y-auto">
           {selectedParcel ? (
             <div className="space-y-4">
               
               {/* Header */}
-              <div className="border-b border-slate-700 pb-3">
+              <div className="border-b border-slate-200 pb-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-emerald-400 font-semibold uppercase tracking-wider">
+                  <span className="text-[11px] font-mono text-blue-800 font-bold uppercase tracking-wider">
                     Assam Cadastral Parcel
                   </span>
                   {selectedParcel.yieldGrade === 'EXCELLENT' && (
-                    <span className="bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded text-[10px] font-semibold">
+                    <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold">
                       Excellent Yield
                     </span>
                   )}
                   {selectedParcel.yieldGrade === 'NORMAL' && (
-                    <span className="bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded text-[10px] font-semibold">
+                    <span className="bg-blue-50 text-blue-800 border border-blue-300 px-2 py-0.5 rounded text-[10px] font-bold">
                       Normal Yield
                     </span>
                   )}
                   {selectedParcel.yieldGrade === 'STRESSED_CRITICAL' && (
-                    <span className="bg-red-950 text-red-300 border border-red-800 px-2 py-0.5 rounded text-[10px] font-semibold animate-pulse">
+                    <span className="bg-red-50 text-red-700 border border-red-300 px-2 py-0.5 rounded text-[10px] font-bold animate-pulse">
                       Flood Inundated
                     </span>
                   )}
                 </div>
-                <h3 className="text-lg font-bold text-white mt-1">
+                <h3 className="text-lg font-bold text-blue-950 mt-1">
                   Dag #{selectedParcel.dagNumber} &bull; Patta {selectedParcel.pattaNumber}
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   {selectedParcel.village}, Circle: {selectedParcel.circle}, {selectedParcel.district}
                 </p>
               </div>
 
               {/* Farmer & Area Details */}
-              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Pattadar / Farmer</span>
-                  <span className="font-semibold text-white">{selectedParcel.farmerName}</span>
+                  <span className="text-slate-500 text-[10px] font-medium block">Pattadar / Farmer</span>
+                  <span className="font-bold text-slate-900">{selectedParcel.farmerName}</span>
                   <span className="text-[10px] font-mono text-slate-500 block">{selectedParcel.farmerId}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Assam BKL Area</span>
-                  <span className="font-mono font-semibold text-emerald-400">
+                  <span className="text-slate-500 text-[10px] font-medium block">Assam BKL Area</span>
+                  <span className="font-mono font-bold text-blue-900">
                     {selectedParcel.areaBigha}B {selectedParcel.areaKatha}K {selectedParcel.areaLesa}L
                   </span>
                   <span className="text-[10px] font-mono text-slate-500 block">({selectedParcel.areaHectares} Hectares)</span>
@@ -406,88 +395,88 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
               </div>
 
               {/* Crop & Phenology */}
-              <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 text-xs space-y-1.5">
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Crop &amp; Variety:</span>
-                  <span className="font-medium text-emerald-300">{selectedParcel.cropType.replace('_', ' ')} ({selectedParcel.cropVariety})</span>
+                  <span className="text-slate-500">Crop &amp; Variety:</span>
+                  <span className="font-semibold text-blue-900">{selectedParcel.cropType.replace('_', ' ')} ({selectedParcel.cropVariety})</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Phenological Stage:</span>
-                  <span className="font-mono text-cyan-300">{selectedParcel.stage}</span>
+                  <span className="text-slate-500">Phenological Stage:</span>
+                  <span className="font-mono font-medium text-slate-800">{selectedParcel.stage}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Expected Harvest:</span>
-                  <span className="font-mono text-slate-300">{selectedParcel.expectedHarvestDate}</span>
+                  <span className="text-slate-500">Expected Harvest:</span>
+                  <span className="font-mono text-slate-800">{selectedParcel.expectedHarvestDate}</span>
                 </div>
               </div>
 
               {/* Spectral & Remote Sensing Telemetry */}
-              <div className="border border-slate-700/80 rounded-lg p-3 bg-slate-900/80 space-y-2">
-                <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block flex items-center gap-1.5">
-                  <Satellite className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-2">
+                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block flex items-center gap-1.5">
+                  <Satellite className="w-3.5 h-3.5 text-blue-700" />
                   <span>Remote Sensing Telemetry</span>
                 </span>
                 
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-slate-800 p-2 rounded border border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">NDVI</span>
-                    <span className="font-mono font-bold text-emerald-400 text-sm">
+                  <div className="bg-white p-2 rounded border border-slate-200 shadow-2xs">
+                    <span className="text-[10px] text-slate-500 font-medium block">NDVI</span>
+                    <span className="font-mono font-bold text-emerald-700 text-sm">
                       {selectedParcel.spectralIndices.ndvi}
                     </span>
                   </div>
-                  <div className="bg-slate-800 p-2 rounded border border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">SAR VV</span>
-                    <span className="font-mono font-bold text-cyan-300 text-sm">
+                  <div className="bg-white p-2 rounded border border-slate-200 shadow-2xs">
+                    <span className="text-[10px] text-slate-500 font-medium block">SAR VV</span>
+                    <span className="font-mono font-bold text-blue-800 text-sm">
                       {selectedParcel.spectralIndices.sarBackscatterVvDb} dB
                     </span>
                   </div>
-                  <div className="bg-slate-800 p-2 rounded border border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">LAI</span>
-                    <span className="font-mono font-bold text-amber-300 text-sm">
+                  <div className="bg-white p-2 rounded border border-slate-200 shadow-2xs">
+                    <span className="text-[10px] text-slate-500 font-medium block">LAI</span>
+                    <span className="font-mono font-bold text-amber-700 text-sm">
                       {selectedParcel.spectralIndices.lai} m²/m²
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1">
                   <span>Cloud Cover at Capture:</span>
-                  <span className="font-mono text-slate-200">{selectedParcel.spectralIndices.opticalCloudCoverPercent}% (SAR Compensated)</span>
+                  <span className="font-mono font-medium text-slate-800">{selectedParcel.spectralIndices.opticalCloudCoverPercent}% (SAR Compensated)</span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-600">
                   <span>UAV Drone Resolution:</span>
-                  <span className="font-mono text-purple-300">
+                  <span className="font-mono font-semibold text-purple-700">
                     {selectedParcel.uavSurveyed ? `${selectedParcel.uavResolutionCm} cm/px` : 'Satellite Only'}
                   </span>
                 </div>
               </div>
 
               {/* Yield Prediction Box */}
-              <div className="bg-emerald-950/60 border border-emerald-800/80 rounded-lg p-3 text-center">
-                <span className="text-xs text-emerald-300 uppercase tracking-wider block">Estimated Harvest Yield</span>
-                <div className="text-2xl font-black text-white font-mono mt-0.5">
-                  {selectedParcel.estimatedYieldKgHa} <span className="text-xs font-normal text-slate-300">kg/ha</span>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                <span className="text-xs text-blue-900 font-bold uppercase tracking-wider block">Estimated Harvest Yield</span>
+                <div className="text-2xl font-black text-blue-950 font-mono mt-0.5">
+                  {selectedParcel.estimatedYieldKgHa} <span className="text-xs font-normal text-slate-600">kg/ha</span>
                 </div>
-                <div className="text-xs font-mono text-emerald-400 mt-0.5">
+                <div className="text-xs font-mono font-semibold text-blue-800 mt-0.5">
                   &asymp; {selectedParcel.estimatedYieldQuintalBigha} Quintals / Assam Bigha ({selectedParcel.estimatedProductionTonnes} MT Total)
                 </div>
-                <span className="text-[10px] text-slate-400 block mt-1">
+                <span className="text-[10px] text-slate-500 block mt-1">
                   AI Multi-Model Confidence: <b>{selectedParcel.confidenceScore}%</b>
                 </span>
               </div>
 
             </div>
           ) : (
-            <div className="text-center py-20 text-slate-400 text-sm">
+            <div className="text-center py-20 text-slate-500 text-sm">
               Click any parcel on the map to inspect remote sensing telemetry and predicted yield.
             </div>
           )}
 
           {/* Action Buttons */}
           {selectedParcel && (
-            <div className="pt-3 border-t border-slate-700 space-y-2">
+            <div className="pt-3 border-t border-slate-200 space-y-2">
               <button
                 onClick={() => onOpenCertificate && onOpenCertificate(selectedParcel)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                className="w-full bg-[#0c2340] hover:bg-blue-900 text-white py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
               >
                 <FileCheck2 className="w-4 h-4" />
                 <span>Issue Farmer Yield Certificate</span>
@@ -495,9 +484,9 @@ export const CadastralMapViewer: React.FC<CadastralMapViewerProps> = ({
 
               <button
                 onClick={() => onDispatchDrone && onDispatchDrone(selectedParcel)}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors border border-slate-600"
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-slate-300"
               >
-                <Plane className="w-3.5 h-3.5 text-purple-400" />
+                <Plane className="w-3.5 h-3.5 text-purple-700" />
                 <span>Dispatch High-Res Drone Survey</span>
               </button>
             </div>

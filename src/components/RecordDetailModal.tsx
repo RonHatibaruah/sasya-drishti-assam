@@ -4,15 +4,7 @@ import {
   Sprout, 
   Satellite, 
   Plane, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Calendar, 
-  FileCheck2, 
-  Layers, 
-  Scale, 
-  User, 
-  TrendingUp,
-  Waves
+  FileCheck2
 } from 'lucide-react';
 import { CropParcelRecord } from '../types/cropYield';
 
@@ -32,13 +24,13 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
   if (!parcel) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-slate-900 text-slate-100 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white text-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Modal Header */}
-        <div className="bg-slate-950 px-6 py-4 flex justify-between items-center border-b border-slate-800">
+        <div className="bg-[#0c2340] px-6 py-4 flex justify-between items-center border-b border-blue-900 text-white">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="p-2.5 rounded-xl bg-blue-800 text-white border border-blue-600">
               <Sprout className="w-5 h-5" />
             </div>
             <div>
@@ -46,11 +38,11 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
                 <h3 className="text-base font-bold text-white">
                   Dag #{parcel.dagNumber} &bull; Patta {parcel.pattaNumber}
                 </h3>
-                <span className="text-[11px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded">
+                <span className="text-[11px] font-mono bg-blue-900 text-blue-200 border border-blue-700 px-2 py-0.5 rounded font-bold">
                   {parcel.cropType.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-blue-200/90 font-medium">
                 {parcel.village}, Circle: {parcel.circle}, {parcel.district} &bull; Assam
               </p>
             </div>
@@ -58,7 +50,7 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-blue-200 hover:text-white p-1 rounded-lg hover:bg-blue-900 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,104 +60,104 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
         <div className="p-6 overflow-y-auto space-y-5 text-xs">
           
           {/* Farmer & Area */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-700/60">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <div>
-              <span className="text-slate-400 text-[10px] uppercase tracking-wider block font-semibold mb-1">
+              <span className="text-slate-500 text-[10px] uppercase tracking-wider block font-bold mb-1">
                 Pattadar / Farmer Particulars
               </span>
               <div className="space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Name:</span>
-                  <span className="font-semibold text-white">{parcel.farmerName}</span>
+                  <span className="text-slate-500">Name:</span>
+                  <span className="font-bold text-slate-900">{parcel.farmerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Farmer ID:</span>
-                  <span className="font-mono text-cyan-300">{parcel.farmerId}</span>
+                  <span className="text-slate-500">Farmer ID:</span>
+                  <span className="font-mono font-bold text-blue-900">{parcel.farmerId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Contact:</span>
-                  <span className="font-mono text-slate-300">{parcel.contactPhone}</span>
+                  <span className="text-slate-500">Contact:</span>
+                  <span className="font-mono text-slate-700">{parcel.contactPhone}</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <span className="text-slate-400 text-[10px] uppercase tracking-wider block font-semibold mb-1">
+              <span className="text-slate-500 text-[10px] uppercase tracking-wider block font-bold mb-1">
                 Land Parcel Dimensions
               </span>
               <div className="space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Assam BKL Area:</span>
-                  <span className="font-mono font-bold text-emerald-400">
+                  <span className="text-slate-500">Assam BKL Area:</span>
+                  <span className="font-mono font-bold text-blue-900">
                     {parcel.areaBigha}B - {parcel.areaKatha}K - {parcel.areaLesa}L
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Metric Equivalent:</span>
-                  <span className="font-mono text-slate-300">{parcel.areaHectares} Hectares</span>
+                  <span className="text-slate-500">Metric Equivalent:</span>
+                  <span className="font-mono text-slate-800 font-semibold">{parcel.areaHectares} Hectares</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Variety Sown:</span>
-                  <span className="text-emerald-300 font-medium">{parcel.cropVariety}</span>
+                  <span className="text-slate-500">Variety Sown:</span>
+                  <span className="text-blue-950 font-bold">{parcel.cropVariety}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Spectral Telemetry */}
-          <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 space-y-3">
-            <span className="text-slate-400 text-[10px] uppercase tracking-wider block font-semibold flex items-center gap-1.5">
-              <Satellite className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <span className="text-slate-600 text-[10px] uppercase tracking-wider block font-bold flex items-center gap-1.5">
+              <Satellite className="w-3.5 h-3.5 text-blue-800" />
               <span>Multi-Sensor Remote Sensing Observations</span>
             </span>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">Sentinel-2 NDVI</span>
-                <span className="font-mono font-bold text-emerald-400 text-sm block mt-0.5">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-medium block">Sentinel-2 NDVI</span>
+                <span className="font-mono font-bold text-emerald-700 text-sm block mt-0.5">
                   {parcel.spectralIndices.ndvi}
                 </span>
-                <span className="text-[9px] text-slate-500">Optical Vigour</span>
+                <span className="text-[9px] text-slate-500 font-medium">Optical Vigour</span>
               </div>
 
-              <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">Sentinel-1 SAR VV</span>
-                <span className="font-mono font-bold text-cyan-300 text-sm block mt-0.5">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-medium block">Sentinel-1 SAR VV</span>
+                <span className="font-mono font-bold text-blue-900 text-sm block mt-0.5">
                   {parcel.spectralIndices.sarBackscatterVvDb} dB
                 </span>
-                <span className="text-[9px] text-slate-500">Radar Backscatter</span>
+                <span className="text-[9px] text-slate-500 font-medium">Radar Backscatter</span>
               </div>
 
-              <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">Leaf Area Index (LAI)</span>
-                <span className="font-mono font-bold text-amber-300 text-sm block mt-0.5">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-medium block">Leaf Area Index (LAI)</span>
+                <span className="font-mono font-bold text-amber-700 text-sm block mt-0.5">
                   {parcel.spectralIndices.lai} m²/m²
                 </span>
-                <span className="text-[9px] text-slate-500">Canopy Density</span>
+                <span className="text-[9px] text-slate-500 font-medium">Canopy Density</span>
               </div>
 
-              <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">UAV Drone Flight</span>
-                <span className="font-mono font-bold text-purple-300 text-sm block mt-0.5">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-medium block">UAV Drone Flight</span>
+                <span className="font-mono font-bold text-purple-700 text-sm block mt-0.5">
                   {parcel.uavSurveyed ? `${parcel.uavResolutionCm} cm` : 'None'}
                 </span>
-                <span className="text-[9px] text-slate-500">{parcel.uavSurveyed ? 'Surveyed' : 'Scheduled'}</span>
+                <span className="text-[9px] text-slate-500 font-medium">{parcel.uavSurveyed ? 'Surveyed' : 'Scheduled'}</span>
               </div>
             </div>
           </div>
 
           {/* Harvest & Yield Projection Box */}
-          <div className="bg-emerald-950/80 border border-emerald-700/80 rounded-xl p-4 text-center">
-            <span className="text-xs text-emerald-300 uppercase tracking-wider block font-semibold">
+          <div className="bg-blue-50 border-2 border-blue-600 rounded-xl p-4 text-center shadow-2xs">
+            <span className="text-xs text-blue-900 uppercase tracking-wider block font-bold">
               Estimated Crop Yield &amp; Total Production
             </span>
-            <div className="text-3xl font-black text-white font-mono mt-1">
-              {parcel.estimatedYieldKgHa} <span className="text-sm font-normal text-slate-300">kg/hectare</span>
+            <div className="text-3xl font-black text-blue-950 font-mono mt-1">
+              {parcel.estimatedYieldKgHa} <span className="text-sm font-normal text-slate-600">kg/hectare</span>
             </div>
-            <div className="text-xs font-mono text-emerald-400 mt-1">
+            <div className="text-xs font-mono font-bold text-blue-900 mt-1">
               &asymp; {parcel.estimatedYieldQuintalBigha} Quintals per Bigha &bull; Projected Production: {parcel.estimatedProductionTonnes} MT
             </div>
-            <span className="text-[11px] text-slate-400 block mt-1">
+            <span className="text-[11px] text-slate-600 block mt-1">
               Estimated Harvest Date: <b>{parcel.expectedHarvestDate}</b> &bull; Growth Stage: <b>{parcel.stage}</b>
             </span>
           </div>
@@ -173,9 +165,9 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="bg-slate-950 px-6 py-3.5 border-t border-slate-800 flex flex-wrap justify-between items-center gap-3">
-          <div className="text-slate-400 text-xs">
-            CCE Verification: <b className="text-slate-200 font-mono">{parcel.cceStatus}</b>
+        <div className="bg-slate-100 px-6 py-3.5 border-t border-slate-200 flex flex-wrap justify-between items-center gap-3">
+          <div className="text-slate-600 text-xs">
+            CCE Verification: <b className="text-blue-950 font-mono">{parcel.cceStatus}</b>
           </div>
 
           <div className="flex gap-2">
@@ -184,9 +176,9 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
                 onClose();
                 if (onDispatchDrone) onDispatchDrone(parcel);
               }}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition-colors flex items-center gap-1.5"
+              className="bg-white hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors flex items-center gap-1.5"
             >
-              <Plane className="w-3.5 h-3.5 text-purple-400" />
+              <Plane className="w-3.5 h-3.5 text-purple-700" />
               <span>Dispatch Drone</span>
             </button>
 
@@ -195,9 +187,9 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
                 onClose();
                 if (onOpenCertificate) onOpenCertificate(parcel);
               }}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+              className="bg-[#0c2340] hover:bg-blue-900 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
             >
-              <FileCheck2 className="w-3.5 h-3.5" />
+              <FileCheck2 className="w-4 h-4" />
               <span>View &amp; Print Certificate</span>
             </button>
           </div>
